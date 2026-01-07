@@ -2,158 +2,57 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>Ricerca ricette</title>
-  
+  <title>Test Supabase</title>
 </head>
 <body>
 
-  <h1>Cerca ricette</h1>
+  <h1>Test connessione Supabase</h1>
 
-  <!-- INGREDIENTI -->
-  <section>
-    <h2>Ingredienti principali</h2>
-    <div id="ingredienti"></div>
-    <button id="searchBtn">Cerca ricette</button>
-  </section>
+  <div id="output">Caricamento...</div>
 
-  <!-- RISULTATI -->
-  <section>
-    <h2>Risultati</h2>
-    <div id="results"></div>
-  </section>
-
-  <!-- SCRIPT -->
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
     /* ==========================
-       CONFIGURAZIONE SUPABASE
+       CONFIG SUPABASE
     ========================== */
     const supabaseUrl = 'https://uummgynzxypcscvqtihf.supabase.com'
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1bW1neW56eHlwY3NjdnF0aWhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMjE2ODAsImV4cCI6MjA4MjY5NzY4MH0.e0mQ1QZ2B86JsAuy24kIkt43-m6KQz_zj7oYIi8P6I8'
+    const supabaseKey = 'INCOLLA QUI LA ANON KEY'
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     /* ==========================
-       CARICA INGREDIENTI
+       TEST QUERY
     ========================== */
-    async function loadIngredienti() {
+    async function testDB() {
       const { data, error } = await supabase
-        .from('ingredienti')
+        .from('ricette')
         .select('*')
-        .order('nome')
+        .limit(1)
+
+      const output = document.getElementById('output')
 
       if (error) {
         console.error(error)
+        output.innerHTML = `<p style="color:red">Errore: ${error.message}</p>`
         return
       }
 
-      const container = document.getElementById('ingredienti')
-
-      data.forEach(ing => {
-        const label = document.createElement('label')
-        label.innerHTML = `
-          <input type="checkbox" value="${ing.id}">
-          ${ing.nome}
-        `
-        container.appendChild(label)
-      })
-    }
-
-    loadIngredienti()
-
-    /* ==========================
-       INGREDIENTI SELEZIONATI
-    ========================== */
-    function getSelectedIngredienti() {
-      return Array.from(
-        document.querySelectorAll('#ingredienti input:checked')
-      ).map(cb => cb.value)
-    }
-
-    /* ==========================
-       QUERY DI RICERCA
-    ========================== */
-    async function searchRicette() {
-      const ingredientIds = getSelectedIngredienti()
-
-      if (ingredientIds.length === 0) {
-        alert('Seleziona almeno un ingrediente')
+      if (!data || data.length === 0) {
+        output.innerHTML = '<p>Nessuna ricetta trovata nel DB</p>'
         return
       }
 
-      const { data, error } = await supabase
-        .from('ricette_ingredienti')
-        .select(`
-          ricetta_id,
-          ricette (
-            id,
-            titolo,
-            immagine_url
-          )
-        `)
-        .in('ingrediente_id', ingredientIds)
-        .eq('principale', true)
+      const ricetta = data[0]
 
-      if (error) {
-        console.error(error)
-        return
-      }
-
-      /* ==========================
-         LOGICA: ricette che
-         contengono TUTTI gli ingredienti
-      ========================== */
-      const countMap = {}
-
-      data.forEach(row => {
-        countMap[row.ricetta_id] =
-          (countMap[row.ricetta_id] || 0) + 1
-      })
-
-      const ricetteValide = Object.entries(countMap)
-        .filter(([_, count]) => count === ingredientIds.length)
-        .map(([id]) => id)
-
-      const risultati = data.filter(row =>
-        ricetteValide.includes(row.ricetta_id)
-      )
-
-      renderResults(risultati)
+      output.innerHTML = `
+        <h2>${ricetta.titolo}</h2>
+        <p>${ricetta.descrizione ?? ''}</p>
+        <pre>${JSON.stringify(ricetta, null, 2)}</pre>
+      `
     }
 
-    /* ==========================
-       MOSTRA RISULTATI
-    ========================== */
-    function renderResults(data) {
-      const container = document.getElementById('results')
-      container.innerHTML = ''
-
-      if (data.length === 0) {
-        container.innerHTML = '<p>Nessuna ricetta trovata</p>'
-        return
-      }
-
-      data.forEach(row => {
-        const r = row.ricette
-        const article = document.createElement('article')
-
-        article.innerHTML = `
-          <h3>${r.titolo}</h3>
-          ${r.immagine_url ? `<img src="${r.immagine_url}">` : ''}
-          <a href="ricetta.html?id=${r.id}">Vedi ricetta</a>
-        `
-
-        container.appendChild(article)
-      })
-    }
-
-    /* ==========================
-       EVENTO BOTTONE
-    ========================== */
-    document
-      .getElementById('searchBtn')
-      .addEventListener('click', searchRicette)
-
+    testDB()
   </script>
+
 </body>
 </html>
