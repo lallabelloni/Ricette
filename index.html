@@ -43,9 +43,7 @@
       const ricetta = data[0]
 
       output.innerHTML = `
-        <h2>${ricetta.titolo}</h2>
-        <p>${ricetta.descrizione ?? ''}</p>
-        <pre>${JSON.stringify(ricetta, null, 2)}</pre>
+        <h2>${ricetta.nome}</h2>
       `
     }
 
