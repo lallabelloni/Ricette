@@ -25,10 +25,8 @@
     ========================== */
     async function testDB() {
       const { data, error } = await supabase
-        .from('ricetta')
+        .from('ricette')
         .select('*')
-        .limit(1)
-
       const output = document.getElementById('output')
 
       if (error) {
