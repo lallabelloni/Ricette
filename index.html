@@ -1,46 +1,159 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <title>Le ricette di Francesco</title>
+  <meta charset="UTF-8" />
+  <title>Ricerca ricette</title>
+  
 </head>
-
 <body>
-  <header>
-    <h1>Le ricette di Francesco 🍝</h1>
-    <p>Un posto dove raccogliere, condividere e trovare ispirazione in cucina.</p>
 
-    <nav>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="ricerca.html">Cerca per ingredienti</a></li>
-        <li><a href="stagioni.html">Ricette per stagione</a></li>
-      </ul>
-    </nav>
-  </header>
+  <h1>Cerca ricette</h1>
 
-  <main>
-    <section>
-      <h2>Ultime ricette</h2>
+  <!-- INGREDIENTI -->
+  <section>
+    <h2>Ingredienti principali</h2>
+    <div id="ingredienti"></div>
+    <button id="searchBtn">Cerca ricette</button>
+  </section>
 
-      <article>
-        <h3>Pasta con zucchine e limone</h3>
-        <p>Una ricetta fresca e veloce, perfetta per l’estate.</p>
-        <img src="img/pasta-zucchine.jpg" alt="Pasta con zucchine e limone" width="300">
-        <p><a href="#">Vedi ricetta</a></p>
-      </article>
+  <!-- RISULTATI -->
+  <section>
+    <h2>Risultati</h2>
+    <div id="results"></div>
+  </section>
 
-      <article>
-        <h3>Risotto ai funghi</h3>
-        <p>Classico comfort food autunnale.</p>
-        <img src="img/risotto-funghi.jpg" alt="Risotto ai funghi" width="300">
-        <p><a href="#">Vedi ricetta</a></p>
-      </article>
-    </section>
-  </main>
+  <!-- SCRIPT -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-  <footer>
-    <p>💙 Creato per Francesco</p>
-  </footer>
+    /* ==========================
+       CONFIGURAZIONE SUPABASE
+    ========================== */
+    const supabaseUrl = 'https://uummgynzxypcscvqtihf.supabase.co
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1bW1neW56eHlwY3NjdnF0aWhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMjE2ODAsImV4cCI6MjA4MjY5NzY4MH0.e0mQ1QZ2B86JsAuy24kIkt43-m6KQz_zj7oYIi8P6I8'
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    /* ==========================
+       CARICA INGREDIENTI
+    ========================== */
+    async function loadIngredienti() {
+      const { data, error } = await supabase
+        .from('ingredienti')
+        .select('*')
+        .order('nome')
+
+      if (error) {
+        console.error(error)
+        return
+      }
+
+      const container = document.getElementById('ingredienti')
+
+      data.forEach(ing => {
+        const label = document.createElement('label')
+        label.innerHTML = `
+          <input type="checkbox" value="${ing.id}">
+          ${ing.nome}
+        `
+        container.appendChild(label)
+      })
+    }
+
+    loadIngredienti()
+
+    /* ==========================
+       INGREDIENTI SELEZIONATI
+    ========================== */
+    function getSelectedIngredienti() {
+      return Array.from(
+        document.querySelectorAll('#ingredienti input:checked')
+      ).map(cb => cb.value)
+    }
+
+    /* ==========================
+       QUERY DI RICERCA
+    ========================== */
+    async function searchRicette() {
+      const ingredientIds = getSelectedIngredienti()
+
+      if (ingredientIds.length === 0) {
+        alert('Seleziona almeno un ingrediente')
+        return
+      }
+
+      const { data, error } = await supabase
+        .from('ricette_ingredienti')
+        .select(`
+          ricetta_id,
+          ricette (
+            id,
+            titolo,
+            immagine_url
+          )
+        `)
+        .in('ingrediente_id', ingredientIds)
+        .eq('principale', true)
+
+      if (error) {
+        console.error(error)
+        return
+      }
+
+      /* ==========================
+         LOGICA: ricette che
+         contengono TUTTI gli ingredienti
+      ========================== */
+      const countMap = {}
+
+      data.forEach(row => {
+        countMap[row.ricetta_id] =
+          (countMap[row.ricetta_id] || 0) + 1
+      })
+
+      const ricetteValide = Object.entries(countMap)
+        .filter(([_, count]) => count === ingredientIds.length)
+        .map(([id]) => id)
+
+      const risultati = data.filter(row =>
+        ricetteValide.includes(row.ricetta_id)
+      )
+
+      renderResults(risultati)
+    }
+
+    /* ==========================
+       MOSTRA RISULTATI
+    ========================== */
+    function renderResults(data) {
+      const container = document.getElementById('results')
+      container.innerHTML = ''
+
+      if (data.length === 0) {
+        container.innerHTML = '<p>Nessuna ricetta trovata</p>'
+        return
+      }
+
+      data.forEach(row => {
+        const r = row.ricette
+        const article = document.createElement('article')
+
+        article.innerHTML = `
+          <h3>${r.titolo}</h3>
+          ${r.immagine_url ? `<img src="${r.immagine_url}">` : ''}
+          <a href="ricetta.html?id=${r.id}">Vedi ricetta</a>
+        `
+
+        container.appendChild(article)
+      })
+    }
+
+    /* ==========================
+       EVENTO BOTTONE
+    ========================== */
+    document
+      .getElementById('searchBtn')
+      .addEventListener('click', searchRicette)
+
+  </script>
 </body>
 </html>
