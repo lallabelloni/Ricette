@@ -26,7 +26,7 @@
     async function testDB() {
       const { data, error } = await supabase
         .from('ricetta')
-        .select('*')
+        .select('nome')
       const output = document.getElementById('output')
 
       if (error) {
