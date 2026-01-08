@@ -8,12 +8,24 @@
 
   <h1>ricerca la ricetta!</h1>
 
-  <input
-    type="text"
-    id="searchInput"
-    placeholder="Scrivi il nome della ricetta..."
-  >
+  <input type="text" id="searchInput" placeholder="Scrivi il nome della ricetta...">
   <button id="searchBtn">Cerca</button>
+
+  <button id="filterToggle">Filtri</button>
+
+  <div id="filters" style="display:none; border:1px solid #ccc; padding:10px">
+
+    <h3>Categorie</h3>
+    <div id="categorie"></div>
+
+    <h3>Stagioni</h3>
+    <div id="stagioni"></div>
+
+    <h3>Ingredienti</h3>
+    <div id="ingredienti"></div>
+
+    <button id="applyFilters">Applica filtri</button>
+  </div>
 
   <div id="output">Caricamento...</div>
 
@@ -56,7 +68,7 @@
       data.forEach(r => {
         resultsDiv.innerHTML += `
           <div>
-            ${r.nome} | ${r.fonte ?? '-'} | ${r.costo} | ${r.gusto} | ${r.sbatti} | ${Number(r.punteggio).toFixed(2)}
+            ${r.nome} | ${r.fonte ?? '-'} | costo: ${r.costo} | gusto: ${r.gusto} | sbatti: ${r.sbatti} | ⭐: ${Number(r.punteggio)}
           </div>
         `
       })
@@ -105,28 +117,120 @@
 
       renderList(data)
     }
-    
-    /*document
-      .getElementById('searchBtn')
-      .addEventListener('click', searchRicette)
+
+    /* ==========================
+      CARICAMENTO FILTRI
+    ========================== */
+    async function loadCheckbox(table, containerId) {
+      const { data } = await supabase
+        .from(table)
+        .select('id, nome')
+        .order('nome')
+
+      const c = document.getElementById(containerId)
+      data.forEach(e => {
+        c.innerHTML += `
+          <label>
+            <input type="checkbox" value="${e.id}">
+            ${e.nome}
+          </label><br>
+        `
+      })
+    }
+
+    /* ==========================
+      UTILS FILTRI
+    ========================== */
+    function getCheckedIds(id) {
+      return [...document.querySelectorAll(`#${id} input:checked`)]
+        .map(cb => cb.value)
+    }
+
+    function intersect(arrays) {
+      return arrays.reduce((a, b) => a.filter(x => b.includes(x)))
+    }
+
+    /* ==========================
+      QUERY TABELLE PONTE
+    ========================== */
+    async function getRicettaIds(table, column, ids) {
+      if (ids.length === 0) return null
+
+      const { data } = await supabase
+        .from(table)
+        .select('ricetta_id')
+        .in(column, ids)
+
+      return data.map(r => r.ricetta_id)
+    }
+
+    /* ==========================
+      APPLICA FILTRI
+    ========================== */
+    async function applyFilters() {
+      const c = getCheckedIds('categorie')
+      const s = getCheckedIds('stagioni')
+      const i = getCheckedIds('ingredienti')
+
+      const lists = []
+
+      if (c.length) lists.push(await getRicettaIds('ricetta_categorie', 'categoria_id', c))
+      if (s.length) lists.push(await getRicettaIds('ricetta_stagioni', 'stagione_id', s))
+      if (i.length) lists.push(await getRicettaIds('ricetta_ingredienti', 'ingrediente_id', i))
+
+      if (lists.length === 0) {
+        loadAllRicette()
+        return
+      }
+
+      const ids = intersect(lists)
+      if (ids.length === 0) {
+        renderList([])
+        return
+      }
+
+      const { data } = await supabase
+        .from('ricetta')
+        .select('nome, fonte, costo, gusto, sbatti, punteggio')
+        .in('id', ids)
+
+      renderList(data)
+    }
+
+    /* ==========================
+      EVENTI
+    ========================== */
+
+    document.getElementById('searchBtn').onclick = searchRicette
+    searchInput.onkeydown = e => e.key === 'Enter' && searchRicette()
+    document.getElementById('applyFilters').onclick = applyFilters
+    document.getElementById('filterToggle').onclick = () => {
+      const f = document.getElementById('filters')
+      f.style.display = f.style.display === 'none' ? 'block' : 'none'
+    }
+/*
+    document.getElementById('filterToggle').onclick = () => {
+      const f = document.getElementById('filters')
+      f.style.display = f.style.display === 'none' ? 'block' : 'none'
+    }
 
     document
-      .getElementById('searchInput')
-      .addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-          searchRicette()
-      }
-      })*/
+      .getElementById('applyFilters')
+      .addEventListener('click', applyFilters)
+
     document.getElementById('searchBtn')
       .addEventListener('click', searchRicette)
 
     searchInput.addEventListener('keydown', e => {
       if (e.key === 'Enter') searchRicette()
     })
-
+*/
       /* ==========================
         INIT
       ========================== */
+      loadCheckbox('categorie', 'categorie')
+      loadCheckbox('stagioni', 'stagioni')
+      loadCheckbox('ingredienti', 'ingredienti')
       loadAllRicette()
   </script>
 
