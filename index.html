@@ -129,7 +129,7 @@
       const idLists = []
       
       if (categorieSelezionate.length > 0) {
-        const ids = await getRicettaIds('ricetta_categorie', 'id_categorie', categorieSelezionate)
+        const ids = await getRicettaIds('ricetta-categorie', 'id_categorie', categorieSelezionate)
         console.log('IDs da categorie:', ids)
         if (ids.length === 0) { 
           renderList([])
@@ -139,7 +139,7 @@
       }
       
       if (stagioniSelezionate.length > 0) {
-        const ids = await getRicettaIds('ricetta_stagioni', 'id_stagioni', stagioniSelezionate)
+        const ids = await getRicettaIds('ricetta-stagioni', 'id_stagioni', stagioniSelezionate)
         console.log('IDs da stagioni:', ids)
         if (ids.length === 0) { 
           renderList([])
@@ -149,7 +149,7 @@
       }
       
       if (ingredientiSelezionati.length > 0) {
-        const ids = await getRicettaIds('ricetta_ingredienti', 'id_ingredienti', ingredientiSelezionati)
+        const ids = await getRicettaIds('ricetta-ingredienti', 'id_ingredienti', ingredientiSelezionati)
         console.log('IDs da ingredienti:', ids)
         if (ids.length === 0) { 
           renderList([])
