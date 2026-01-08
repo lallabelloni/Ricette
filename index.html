@@ -58,7 +58,7 @@
         <div class="row header">
           Nome | Fonte | Costo | Gusto | Sbatti | Punteggio
         </div>
-        /n
+        ...
       `
 
       data.forEach(r => {
@@ -219,7 +219,8 @@
       const f = document.getElementById('filters')
       f.style.display = f.style.display === 'none' ? 'block' : 'none'
     })
-
+    
+    document.getElementById('applyFilters').addEventListener('click', searchAndFilter)
       /* ==========================
         INIT
       ========================== */
