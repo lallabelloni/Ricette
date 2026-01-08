@@ -129,7 +129,7 @@
       const idLists = []
       
       if (categorieSelezionate.length > 0) {
-        const ids = await getRicettaIds('ricetta_categorie', 'id_categoria', categorieSelezionate)
+        const ids = await getRicettaIds('ricetta_categorie', 'id_categorie', categorieSelezionate)
         console.log('IDs da categorie:', ids)
         if (ids.length === 0) { 
           renderList([])
