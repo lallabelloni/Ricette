@@ -3,35 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <title>ricerca la ricetta!</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #filters { margin: 10px 0; }
+    label { display: block; margin: 5px 0; }
+  </style>
 </head>
 <body>
-
   <h1>ricerca la ricetta!</h1>
-
   <input type="text" id="searchInput" placeholder="Scrivi il nome della ricetta...">
   <button id="searchBtn">Cerca</button>
-
   <button id="filterToggle">Filtri</button>
-
-  <div id="filters" style="display:none; border:1px solid #ccc; padding:10px">
-
+  <div id="filters" style="display:none; border:1px solid #ccc; padding:10px; margin-top:10px">
     <h3>Categorie</h3>
     <div id="categorie"></div>
-
     <h3>Stagioni</h3>
     <div id="stagioni"></div>
-
     <h3>Ingredienti</h3>
     <div id="ingredienti"></div>
-
     <button id="applyFilters">Applica filtri</button>
   </div>
-
   <div id="output">Caricamento...</div>
-
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-
+    
     /* ==========================
        CONFIG SUPABASE
     ========================== */
@@ -41,35 +36,30 @@
     const resultsDiv = document.getElementById('output')
     const searchInput = document.getElementById('searchInput')
     const searchBtn = document.getElementById('searchBtn')
-
+    
     /* ==========================
       RENDER LISTA
     ========================== */
     function renderList(data) {
       resultsDiv.innerHTML = ''
-
       if (!data || data.length === 0) {
         resultsDiv.innerHTML = '<p>Nessun risultato</p>'
         return
       }
-
-      // intestazione
       resultsDiv.innerHTML += `
-        <div class="row header">
+        <div class="row header" style="font-weight:bold; margin-bottom:10px">
           Nome | Fonte | Costo | Gusto | Sbatti | Punteggio
         </div>
-        ...
       `
-
       data.forEach(r => {
         resultsDiv.innerHTML += `
-          <div>
+          <div style="padding:5px; border-bottom:1px solid #eee">
             ${r.nome} | ${r.fonte ?? '-'} | costo: ${r.costo} | gusto: ${r.gusto} | sbatti: ${r.sbatti} | ⭐: ${Number(r.punteggio)}
           </div>
         `
       })
     }
-
+    
     /* ==========================
       CARICAMENTO DEFAULT
     ========================== */
@@ -78,158 +68,194 @@
         .from('ricetta')
         .select('nome, fonte, costo, gusto, sbatti, punteggio')
         .order('punteggio', { ascending: false })
-
       if (error) {
         console.error(error)
         resultsDiv.innerHTML = '<p>Errore caricamento dati</p>'
         return
       }
-
       renderList(data)
     }
-
+    
     /* ==========================
-      RICERCA
+      UTILS FILTRI - CORRETTO!
     ========================== */
-    async function searchAndFilter() {
-    const query = searchInput.value.trim()
-
-    // Prendi i filtri selezionati
-    const categorieSelezionate = getCheckedIds('categorie')
-    const stagioniSelezionate = getCheckedIds('stagioni')
-    const ingredientiSelezionati = getCheckedIds('ingredienti')
-
-    // Lista di array di ID di ricette da intersecare
-    const idLists = []
-
-    if (categorieSelezionate.length) {
-      const ids = await getRicettaIds('ricetta_categorie', 'id_categoria', categorieSelezionate)
-      if (ids.length === 0) { renderList([]); return } // nessuna ricetta corrisponde al filtro
-      idLists.push(ids)
+    function getCheckedIds(containerId) {
+      const checkboxes = document.querySelectorAll('#' + containerId + ' input[type="checkbox"]:checked')
+      return Array.from(checkboxes).map(cb => cb.value)
     }
-
-    if (stagioniSelezionate.length) {
-      const ids = await getRicettaIds('ricetta_stagioni', 'id_stagioni', stagioniSelezionate)
-      if (ids.length === 0) { renderList([]); return }
-      idLists.push(ids)
-    }
-
-    if (ingredientiSelezionati.length) {
-      const ids = await getRicettaIds('ricetta_ingredienti', 'id_ingredienti', ingredientiSelezionati)
-      if (ids.length === 0) { renderList([]); return }
-      idLists.push(ids)
-    }
-
-    // Interseca tutti gli ID dei filtri selezionati
-    const finalIds = idLists.length ? intersect(idLists) : null
-
-    // Se ci sono filtri ma l'intersezione è vuota
-    if (idLists.length && (!finalIds || finalIds.length === 0)) {
-      renderList([])
-      return
-    }
-
-    // Costruisci la query finale
-    let queryBuilder = supabase
-      .from('ricetta')
-      .select('nome, fonte, costo, gusto, sbatti, punteggio')
-      .order('punteggio', { ascending: false })
-
-    if (finalIds) queryBuilder = queryBuilder.in('id', finalIds)
-    if (query) queryBuilder = queryBuilder.ilike('nome', `%${query}%`)
-
-    const { data, error } = await queryBuilder
-
-    if (error) {
-      console.error(error)
-      resultsDiv.innerHTML = '<p>Errore caricamento</p>'
-      return
-    }
-
-    renderList(data)
-  }
-
-
-
-    /* ==========================
-      CARICAMENTO FILTRI
-    ========================== */
-    async function loadCheckbox(table, containerId) {
-      const { data } = await supabase
-        .from(table)
-        .select('id, nome')
-        .order('nome')
-
-      const c = document.getElementById(containerId)
-      data.forEach(e => {
-        c.innerHTML += `
-          <label>
-            <input type="checkbox" value="${e.id}">
-            ${e.nome}
-          </label><br>
-        `
-      })
-    }
-
-    /* ==========================
-      UTILS FILTRI
-    ========================== */
-    function getCheckedIds(id) {
-      return [...document.querySelectorAll(`#${id} input:checked`)]
-        .map(cb => cb.value)
-    }
-
+    
     function intersect(arrays) {
+      if (arrays.length === 0) return []
       return arrays.reduce((a, b) => a.filter(x => b.includes(x)))
     }
-
+    
     /* ==========================
       QUERY TABELLE PONTE
     ========================== */
     async function getRicettaIds(table, column, ids) {
-      if (ids.length === 0) return null
-
-      const { data } = await supabase
+      if (ids.length === 0) return []
+      const { data, error } = await supabase
         .from(table)
         .select('id_ricetta')
         .in(column, ids)
-
-      return data.map(r => r.id_ricetta)
+      
+      if (error) {
+        console.error('Errore getRicettaIds:', error)
+        return []
+      }
+      
+      return data ? data.map(r => r.id_ricetta) : []
     }
-
     
-
+    /* ==========================
+      RICERCA E FILTRI
+    ========================== */
+    async function searchAndFilter() {
+      console.log('Esecuzione searchAndFilter...')
+      const query = searchInput.value.trim()
+      
+      // Prendi i filtri selezionati
+      const categorieSelezionate = getCheckedIds('categorie')
+      const stagioniSelezionate = getCheckedIds('stagioni')
+      const ingredientiSelezionati = getCheckedIds('ingredienti')
+      
+      console.log('Filtri selezionati:', {
+        categorie: categorieSelezionate,
+        stagioni: stagioniSelezionate,
+        ingredienti: ingredientiSelezionati
+      })
+      
+      // Lista di array di ID di ricette da intersecare
+      const idLists = []
+      
+      if (categorieSelezionate.length > 0) {
+        const ids = await getRicettaIds('ricetta_categorie', 'id_categoria', categorieSelezionate)
+        console.log('IDs da categorie:', ids)
+        if (ids.length === 0) { 
+          renderList([])
+          return 
+        }
+        idLists.push(ids)
+      }
+      
+      if (stagioniSelezionate.length > 0) {
+        const ids = await getRicettaIds('ricetta_stagioni', 'id_stagioni', stagioniSelezionate)
+        console.log('IDs da stagioni:', ids)
+        if (ids.length === 0) { 
+          renderList([])
+          return 
+        }
+        idLists.push(ids)
+      }
+      
+      if (ingredientiSelezionati.length > 0) {
+        const ids = await getRicettaIds('ricetta_ingredienti', 'id_ingredienti', ingredientiSelezionati)
+        console.log('IDs da ingredienti:', ids)
+        if (ids.length === 0) { 
+          renderList([])
+          return 
+        }
+        idLists.push(ids)
+      }
+      
+      // Interseca tutti gli ID dei filtri selezionati
+      const finalIds = idLists.length > 0 ? intersect(idLists) : null
+      console.log('IDs finali dopo intersezione:', finalIds)
+      
+      // Se ci sono filtri ma l'intersezione è vuota
+      if (idLists.length > 0 && (!finalIds || finalIds.length === 0)) {
+        renderList([])
+        return
+      }
+      
+      // Costruisci la query finale
+      let queryBuilder = supabase
+        .from('ricetta')
+        .select('nome, fonte, costo, gusto, sbatti, punteggio')
+        .order('punteggio', { ascending: false })
+      
+      if (finalIds && finalIds.length > 0) {
+        queryBuilder = queryBuilder.in('id', finalIds)
+      }
+      
+      if (query) {
+        queryBuilder = queryBuilder.ilike('nome', `%${query}%`)
+      }
+      
+      const { data, error } = await queryBuilder
+      
+      if (error) {
+        console.error(error)
+        resultsDiv.innerHTML = '<p>Errore caricamento</p>'
+        return
+      }
+      
+      console.log('Risultati finali:', data)
+      renderList(data)
+    }
+    
+    /* ==========================
+      CARICAMENTO FILTRI
+    ========================== */
+    async function loadCheckbox(table, containerId) {
+      const { data, error } = await supabase
+        .from(table)
+        .select('id, nome')
+        .order('nome')
+      
+      if (error) {
+        console.error('Errore caricamento checkbox:', error)
+        return
+      }
+      
+      const container = document.getElementById(containerId)
+      data.forEach(e => {
+        container.innerHTML += `
+          <label>
+            <input type="checkbox" value="${e.id}">
+            ${e.nome}
+          </label>
+        `
+      })
+    }
+    
     /* ==========================
       EVENTI
     ========================== */
-
-    // Evento ricerca
     searchInput.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
-        e.preventDefault()    // previene il comportamento di default
-        searchAndFilter()     // esegue la ricerca con filtri
+        e.preventDefault()
+        searchAndFilter()
       }
     })
-
-    // Bottone ricerca
-    searchBtn.addEventListener('click', searchAndFilter)
-
-    // Bottone filtri: toggle senza interferire con focus
+    
+    searchBtn.addEventListener('click', () => {
+      console.log('Click su Cerca')
+      searchAndFilter()
+    })
+    
+    document.getElementById('applyFilters').addEventListener('click', () => {
+      console.log('Click su Applica filtri')
+      searchAndFilter()
+    })
+    
     document.getElementById('filterToggle').addEventListener('click', () => {
       const f = document.getElementById('filters')
       f.style.display = f.style.display === 'none' ? 'block' : 'none'
     })
     
-    document.getElementById('applyFilters').addEventListener('click', searchAndFilter)
-      /* ==========================
-        INIT
-      ========================== */
-      loadCheckbox('categorie', 'categorie')
-      loadCheckbox('stagioni', 'stagioni')
-      loadCheckbox('ingredienti', 'ingredienti')
-      loadAllRicette()
+    /* ==========================
+      INIT
+    ========================== */
+    async function init() {
+      await loadCheckbox('categorie', 'categorie')
+      await loadCheckbox('stagioni', 'stagioni')
+      await loadCheckbox('ingredienti', 'ingredienti')
+      await loadAllRicette()
+      console.log('Inizializzazione completata')
+    }
+    
+    init()
   </script>
-
 </body>
 </html>
-
