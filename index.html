@@ -56,12 +56,7 @@
       // intestazione
       resultsDiv.innerHTML += `
         <div class="row header">
-          <div>Nome</div>
-          <div>Fonte</div>
-          <div>Costo</div>
-          <div>Gusto</div>
-          <div>Sbatti</div>
-          <div>Punteggio</div>
+          <div>Nome</div><div>Fonte</div><div>Costo</div><div>Gusto</div><div>Sbatti</div><div>Punteggio</div>
         </div>
       `
 
@@ -202,29 +197,22 @@
     ========================== */
 
     document.getElementById('searchBtn').onclick = searchRicette
-    searchInput.onkeydown = e => e.key === 'Enter' && searchRicette()
-    document.getElementById('applyFilters').onclick = applyFilters
-    document.getElementById('filterToggle').onclick = () => {
-      const f = document.getElementById('filters')
-      f.style.display = f.style.display === 'none' ? 'block' : 'none'
-    }
-/*
-    document.getElementById('filterToggle').onclick = () => {
-      const f = document.getElementById('filters')
-      f.style.display = f.style.display === 'none' ? 'block' : 'none'
-    }
-
-    document
-      .getElementById('applyFilters')
-      .addEventListener('click', applyFilters)
-
-    document.getElementById('searchBtn')
-      .addEventListener('click', searchRicette)
 
     searchInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') searchRicette()
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        searchRicette()
+      }
     })
-*/
+
+    document.getElementById('applyFilters').onclick = applyFilters
+
+    document.getElementById('filterToggle').onclick = () => {
+      const f = document.getElementById('filters')
+      f.style.display = f.style.display === 'none' ? 'block' : 'none'
+    }
+
+
       /* ==========================
         INIT
       ========================== */
