@@ -90,28 +90,47 @@
     /* ==========================
       RICERCA
     ========================== */
-    async function searchRicette() {
-      const query = searchInput.value.trim()
+    async function searchAndFilter() {
+    const query = searchInput.value.trim()
 
-      if (query === '') {
-        loadAllRicette()
-        return
-      }
+    // Prendi i filtri selezionati
+    const categorieSelezionate = getCheckedIds('categorie')
+    const stagioniSelezionate = getCheckedIds('stagioni')
+    const ingredientiSelezionati = getCheckedIds('ingredienti')
 
-      const { data, error } = await supabase
-        .from('ricetta')
-        .select('nome, fonte, costo, gusto, sbatti, punteggio')
-        .ilike('nome', `%${query}%`)
-        .order('punteggio', { ascending: false })
+    // Lista di array di ID da intersecare
+    const idLists = []
 
-      if (error) {
-        console.error(error)
-        resultsDiv.innerHTML = '<p>Errore ricerca</p>'
-        return
-      }
+    if (categorieSelezionate.length) 
+      idLists.push(await getRicettaIds('ricetta_categorie', 'categoria_id', categorieSelezionate))
+    if (stagioniSelezionate.length) 
+      idLists.push(await getRicettaIds('ricetta_stagioni', 'stagione_id', stagioniSelezionate))
+    if (ingredientiSelezionati.length) 
+      idLists.push(await getRicettaIds('ricetta_ingredienti', 'ingrediente_id', ingredientiSelezionati))
 
-      renderList(data)
+    // Interseca solo se ci sono filtri
+    let finalIds = idLists.length ? intersect(idLists) : null
+
+    // Query ricette
+    let queryBuilder = supabase
+      .from('ricetta')
+      .select('nome, fonte, costo, gusto, sbatti, punteggio')
+      .order('punteggio', { ascending: false })
+
+    if (finalIds) queryBuilder = queryBuilder.in('id', finalIds)
+    if (query) queryBuilder = queryBuilder.ilike('nome', `%${query}%`)
+
+    const { data, error } = await queryBuilder
+
+    if (error) {
+      console.error(error)
+      resultsDiv.innerHTML = '<p>Errore caricamento</p>'
+      return
     }
+
+    renderList(data)
+  }
+
 
     /* ==========================
       CARICAMENTO FILTRI
@@ -159,53 +178,20 @@
       return data.map(r => r.ricetta_id)
     }
 
-    /* ==========================
-      APPLICA FILTRI
-    ========================== */
-    async function applyFilters() {
-      const c = getCheckedIds('categorie')
-      const s = getCheckedIds('stagioni')
-      const i = getCheckedIds('ingredienti')
-
-      const lists = []
-
-      if (c.length) lists.push(await getRicettaIds('ricetta_categorie', 'categoria_id', c))
-      if (s.length) lists.push(await getRicettaIds('ricetta_stagioni', 'stagione_id', s))
-      if (i.length) lists.push(await getRicettaIds('ricetta_ingredienti', 'ingrediente_id', i))
-
-      if (lists.length === 0) {
-        loadAllRicette()
-        return
-      }
-
-      const ids = intersect(lists)
-      if (ids.length === 0) {
-        renderList([])
-        return
-      }
-
-      const { data } = await supabase
-        .from('ricetta')
-        .select('nome, fonte, costo, gusto, sbatti, punteggio')
-        .in('id', ids)
-
-      renderList(data)
-    }
+    
 
     /* ==========================
       EVENTI
     ========================== */
 
-    document.getElementById('searchBtn').onclick = searchRicette
-
+    document.getElementById('searchBtn').onclick = searchAndFilter
     searchInput.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
         e.preventDefault()
-        searchRicette()
+        searchAndFilter()
       }
     })
-
-    document.getElementById('applyFilters').onclick = applyFilters
+    document.getElementById('applyFilters').onclick = searchAndFilter
 
     document.getElementById('filterToggle').onclick = () => {
       const f = document.getElementById('filters')
