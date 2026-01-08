@@ -2,13 +2,20 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>RicerTa</title>
+  <title>Ricerca ricetta</title>
 </head>
 <body>
 
-  <h1>RicerTa</h1>
+  <h1>Ricerca ricetta 🍰</h1>
 
-  <div id="output">Caricamento...</div>
+  <input
+    type="text"
+    id="searchInput"
+    placeholder="Scrivi il nome della ricetta..."
+  >
+  <button id="searchBtn">Cerca</button>
+
+  <div id="output"></div>
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
@@ -17,17 +24,30 @@
        CONFIG SUPABASE
     ========================== */
     const supabaseUrl = 'https://uummgynzxypcscvqtihf.supabase.co'
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1bW1neW56eHlwY3NjdnF0aWhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMjE2ODAsImV4cCI6MjA4MjY5NzY4MH0.e0mQ1QZ2B86JsAuy24kIkt43-m6KQz_zj7oYIi8P6I8'
+    const supabaseKey = 'INCOLLA QUI LA ANON KEY'
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     /* ==========================
-       TEST QUERY
+       RICERCA PER NOME
     ========================== */
-    async function testDB() {
+    async function searchRicette() {
+      const query = document
+        .getElementById('searchInput')
+        .value
+        .trim()
+
+      const output = document.getElementById('output')
+      output.innerHTML = ''
+
+      if (query.length === 0) {
+        output.innerHTML = '<p>Inserisci un testo per cercare</p>'
+        return
+      }
+
       const { data, error } = await supabase
         .from('ricetta')
-        .select('nome')
-      const output = document.getElementById('output')
+        .select('id, nome')
+        .ilike('nome', `%${query}%`)
 
       if (error) {
         console.error(error)
@@ -36,18 +56,20 @@
       }
 
       if (!data || data.length === 0) {
-        output.innerHTML = '<p>Nessuna ricetta trovata nel DB</p>'
+        output.innerHTML = '<p>Nessuna ricetta trovata</p>'
         return
       }
 
-      const ricetta = data[0]
-
-      output.innerHTML = `
-        <h2>${ricetta.nome}</h2>
-      `
+      data.forEach(ricetta => {
+        const div = document.createElement('div')
+        div.innerHTML = `<h3>${ricetta.nome}</h3>`
+        output.appendChild(div)
+      })
     }
 
-    testDB()
+    document
+      .getElementById('searchBtn')
+      .addEventListener('click', searchRicette)
   </script>
 
 </body>
