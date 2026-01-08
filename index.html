@@ -28,99 +28,101 @@
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     /* ==========================
-        RENDER LISTA
-    ========================== */
-    function renderList(data) {
-      resultsDiv.innerHTML = ''
+   RENDER LISTA
+========================== */
+function renderList(data) {
+  resultsDiv.innerHTML = ''
 
-      if (!data || data.length === 0) {
-        resultsDiv.innerHTML = '<p>Nessun risultato</p>'
-        return
-      }
+  if (!data || data.length === 0) {
+    resultsDiv.innerHTML = '<p>Nessun risultato</p>'
+    return
+  }
 
-      // intestazione
-      resultsDiv.innerHTML += `
-        <div class="row header">
-          <div>Nome</div>
-          <div>Fonte</div>
-          <div>Costo</div>
-          <div>Gusto</div>
-          <div>Sbatti</div>
-          <div>Punteggio</div>
-        </div>
-      `
+  // intestazione
+  resultsDiv.innerHTML += `
+    <div class="row header">
+      <div>Nome</div>
+      <div>Fonte</div>
+      <div>Costo</div>
+      <div>Gusto</div>
+      <div>Sbatti</div>
+      <div>Punteggio</div>
+    </div>
+  `
 
-      data.forEach(r => {
-        resultsDiv.innerHTML += `
-          <div class="row">
-            <div>${r.nome}</div>
-            <div>${r.fonte ?? '-'}</div>
-            <div>${r.costo}</div>
-            <div>${r.gusto}</div>
-            <div>${r.sbatti}</div>
-            <div>${Number(r.punteggio).toFixed(2)}</div>
-          </div>
-        `
-      })
-    }
+  data.forEach(r => {
+    resultsDiv.innerHTML += `
+      <div class="row">
+        <div>${r.nome}</div>
+        <div>${r.fonte ?? '-'}</div>
+        <div>${r.costo}</div>
+        <div>${r.gusto}</div>
+        <div>${r.sbatti}</div>
+        <div>${Number(r.punteggio).toFixed(2)}</div>
+      </div>
+    `
+  })
+}
 
-    /* ==========================
-      CARICAMENTO DEFAULT
-    ========================== */
-    async function loadAllRicette() {
-      const { data, error } = await supabase
-        .from('ricetta')
-        .select('nome, fonte, costo, gusto, sbatti, punteggio')
-        .order('punteggio', { ascending: false })
+/* ==========================
+   CARICAMENTO DEFAULT
+========================== */
+async function loadAllRicette() {
+  const { data, error } = await supabase
+    .from('ricetta')
+    .select('nome, fonte, costo, gusto, sbatti, punteggio')
+    .order('punteggio', { ascending: false })
 
-      if (error) {
-        console.error(error)
-        resultsDiv.innerHTML = '<p>Errore caricamento dati</p>'
-        return
-      }
+  if (error) {
+    console.error(error)
+    resultsDiv.innerHTML = '<p>Errore caricamento dati</p>'
+    return
+  }
 
-      renderList(data)
-    }
+  renderList(data)
+}
 
-    /* ==========================
-      RICERCA
-    ========================== */
-    async function searchRicette() {
-      const query = searchInput.value.trim()
+/* ==========================
+   RICERCA
+========================== */
+async function searchRicette() {
+  const query = searchInput.value.trim()
 
-      if (query === '') {
-        loadAllRicette()
-        return
-      }
-
-      const { data, error } = await supabase
-        .from('ricetta')
-        .select('nome, fonte, costo, gusto, sbatti, punteggio')
-        .ilike('nome', `%${query}%`)
-        .order('punteggio', { ascending: false })
-
-      if (error) {
-        console.error(error)
-        resultsDiv.innerHTML = '<p>Errore ricerca</p>'
-        return
-      }
-
-      renderList(data)
-    }
-
-    /* ==========================
-      EVENTI
-    ========================== */
-    searchBtn.addEventListener('click', searchRicette)
-
-    searchInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') searchRicette()
-    })
-
-    /* ==========================
-      INIT
-    ========================== */
+  if (query === '') {
     loadAllRicette()
+    return
+  }
+
+  const { data, error } = await supabase
+    .from('ricetta')
+    .select('nome, fonte, costo, gusto, sbatti, punteggio')
+    .ilike('nome', `%${query}%`)
+    .order('punteggio', { ascending: false })
+
+  if (error) {
+    console.error(error)
+    resultsDiv.innerHTML = '<p>Errore ricerca</p>'
+    return
+  }
+
+  renderList(data)
+}
+    
+    document
+      .getElementById('searchBtn')
+      .addEventListener('click', searchRicette)
+
+    document
+      .getElementById('searchInput')
+      .addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          searchRicette()
+      }
+      })
+      /* ==========================
+        INIT
+      ========================== */
+      loadAllRicette()
   </script>
 
 </body>
