@@ -98,20 +98,37 @@
     const stagioniSelezionate = getCheckedIds('stagioni')
     const ingredientiSelezionati = getCheckedIds('ingredienti')
 
-    // Lista di array di ID da intersecare
+    // Lista di array di ID di ricette da intersecare
     const idLists = []
 
-    if (categorieSelezionate.length) 
-      idLists.push(await getRicettaIds('ricetta_categorie', 'categoria_id', categorieSelezionate))
-    if (stagioniSelezionate.length) 
-      idLists.push(await getRicettaIds('ricetta_stagioni', 'stagione_id', stagioniSelezionate))
-    if (ingredientiSelezionati.length) 
-      idLists.push(await getRicettaIds('ricetta_ingredienti', 'ingrediente_id', ingredientiSelezionati))
+    if (categorieSelezionate.length) {
+      const ids = await getRicettaIds('ricetta_categorie', 'categoria_id', categorieSelezionate)
+      if (ids.length === 0) { renderList([]); return } // nessuna ricetta corrisponde al filtro
+      idLists.push(ids)
+    }
 
-    // Interseca solo se ci sono filtri
-    let finalIds = idLists.length ? intersect(idLists) : null
+    if (stagioniSelezionate.length) {
+      const ids = await getRicettaIds('ricetta_stagioni', 'stagione_id', stagioniSelezionate)
+      if (ids.length === 0) { renderList([]); return }
+      idLists.push(ids)
+    }
 
-    // Query ricette
+    if (ingredientiSelezionati.length) {
+      const ids = await getRicettaIds('ricetta_ingredienti', 'ingrediente_id', ingredientiSelezionati)
+      if (ids.length === 0) { renderList([]); return }
+      idLists.push(ids)
+    }
+
+    // Interseca tutti gli ID dei filtri selezionati
+    const finalIds = idLists.length ? intersect(idLists) : null
+
+    // Se ci sono filtri ma l'intersezione è vuota
+    if (idLists.length && (!finalIds || finalIds.length === 0)) {
+      renderList([])
+      return
+    }
+
+    // Costruisci la query finale
     let queryBuilder = supabase
       .from('ricetta')
       .select('nome, fonte, costo, gusto, sbatti, punteggio')
@@ -130,6 +147,7 @@
 
     renderList(data)
   }
+
 
 
     /* ==========================
