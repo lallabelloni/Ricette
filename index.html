@@ -55,13 +55,8 @@
 
       data.forEach(r => {
         resultsDiv.innerHTML += `
-          <div class="row">
-            <div>${r.nome}</div>
-            <div>${r.fonte ?? '-'}</div>
-            <div>${r.costo}</div>
-            <div>${r.gusto}</div>
-            <div>${r.sbatti}</div>
-            <div>${Number(r.punteggio).toFixed(2)}</div>
+          <div>
+            ${r.nome} | ${r.fonte ?? '-'} | ${r.costo} | ${r.gusto} | ${r.sbatti} | ${Number(r.punteggio).toFixed(2)}
           </div>
         `
       })
@@ -111,7 +106,7 @@
       renderList(data)
     }
     
-    document
+    /*document
       .getElementById('searchBtn')
       .addEventListener('click', searchRicette)
 
@@ -121,7 +116,14 @@
         if (event.key === 'Enter') {
           searchRicette()
       }
-      })
+      })*/
+    document.getElementById('searchBtn')
+      .addEventListener('click', searchRicette)
+
+    searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') searchRicette()
+    })
+
       /* ==========================
         INIT
       ========================== */
