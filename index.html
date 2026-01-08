@@ -202,19 +202,22 @@
       EVENTI
     ========================== */
 
-    document.getElementById('searchBtn').onclick = searchAndFilter
+    // Evento ricerca
     searchInput.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
-        e.preventDefault()
-        searchAndFilter()
+        e.preventDefault()    // previene il comportamento di default
+        searchAndFilter()     // esegue la ricerca con filtri
       }
     })
-    document.getElementById('applyFilters').onclick = searchAndFilter
 
-    document.getElementById('filterToggle').onclick = () => {
+    // Bottone ricerca
+    searchBtn.addEventListener('click', searchAndFilter)
+
+    // Bottone filtri: toggle senza interferire con focus
+    document.getElementById('filterToggle').addEventListener('click', () => {
       const f = document.getElementById('filters')
       f.style.display = f.style.display === 'none' ? 'block' : 'none'
-    }
+    })
 
 
       /* ==========================
