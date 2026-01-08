@@ -2,11 +2,11 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>riceRCa riceTTa</title>
+  <title>ricerca la ricetta!</title>
 </head>
 <body>
 
-  <h1>riceRCa riceTTa</h1>
+  <h1>ricerca la ricetta!</h1>
 
   <input
     type="text"
@@ -28,56 +28,99 @@
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     /* ==========================
-       RICERCA PER NOME
+        RENDER LISTA
+    ========================== */
+    function renderList(data) {
+      resultsDiv.innerHTML = ''
+
+      if (!data || data.length === 0) {
+        resultsDiv.innerHTML = '<p>Nessun risultato</p>'
+        return
+      }
+
+      // intestazione
+      resultsDiv.innerHTML += `
+        <div class="row header">
+          <div>Nome</div>
+          <div>Fonte</div>
+          <div>Costo</div>
+          <div>Gusto</div>
+          <div>Sbatti</div>
+          <div>Punteggio</div>
+        </div>
+      `
+
+      data.forEach(r => {
+        resultsDiv.innerHTML += `
+          <div class="row">
+            <div>${r.nome}</div>
+            <div>${r.fonte ?? '-'}</div>
+            <div>${r.costo}</div>
+            <div>${r.gusto}</div>
+            <div>${r.sbatti}</div>
+            <div>${Number(r.punteggio).toFixed(2)}</div>
+          </div>
+        `
+      })
+    }
+
+    /* ==========================
+      CARICAMENTO DEFAULT
+    ========================== */
+    async function loadAllRicette() {
+      const { data, error } = await supabase
+        .from('ricetta')
+        .select('nome, fonte, costo, gusto, sbatti, punteggio')
+        .order('punteggio', { ascending: false })
+
+      if (error) {
+        console.error(error)
+        resultsDiv.innerHTML = '<p>Errore caricamento dati</p>'
+        return
+      }
+
+      renderList(data)
+    }
+
+    /* ==========================
+      RICERCA
     ========================== */
     async function searchRicette() {
-      const query = document
-        .getElementById('searchInput')
-        .value
-        .trim()
+      const query = searchInput.value.trim()
 
-      const output = document.getElementById('output')
-      output.innerHTML = ''
-
-      if (query.length === 0) {
-        output.innerHTML = '<p>Inserisci un testo per cercare</p>'
+      if (query === '') {
+        loadAllRicette()
         return
       }
 
       const { data, error } = await supabase
         .from('ricetta')
-        .select('id, nome')
+        .select('nome, fonte, costo, gusto, sbatti, punteggio')
         .ilike('nome', `%${query}%`)
+        .order('punteggio', { ascending: false })
 
       if (error) {
         console.error(error)
-        output.innerHTML = `<p style="color:red">Errore: ${error.message}</p>`
+        resultsDiv.innerHTML = '<p>Errore ricerca</p>'
         return
       }
 
-      if (!data || data.length === 0) {
-        output.innerHTML = '<p>Nessuna ricetta trovata</p>'
-        return
-      }
-
-      data.forEach(ricetta => {
-        const div = document.createElement('div')
-        div.innerHTML = `<h3>${ricetta.nome}</h3>`
-        output.appendChild(div)
-      })
+      renderList(data)
     }
 
-    document
-      .getElementById('searchBtn')
-      .addEventListener('click', searchRicette)
+    /* ==========================
+      EVENTI
+    ========================== */
+    searchBtn.addEventListener('click', searchRicette)
 
-    document
-      .getElementById('searchInput')
-      .addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-          searchRicette()
-      }
-      })
+    searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') searchRicette()
+    })
+
+    /* ==========================
+      INIT
+    ========================== */
+    loadAllRicette()
   </script>
 
 </body>
