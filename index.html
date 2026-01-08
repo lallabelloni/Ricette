@@ -219,6 +219,13 @@
       f.style.display = f.style.display === 'none' ? 'block' : 'none'
     })
 
+    document.getElementById('filterToggle').addEventListener('click', () => {
+      const f = document.getElementById('filters')
+      f.style.display = f.style.display === 'none' ? 'block' : 'none'
+      searchInput.focus() // forza il focus sulla barra
+    })
+
+
 
       /* ==========================
         INIT
