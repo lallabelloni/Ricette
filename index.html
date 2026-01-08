@@ -102,19 +102,19 @@
     const idLists = []
 
     if (categorieSelezionate.length) {
-      const ids = await getRicettaIds('ricetta_categorie', 'categoria_id', categorieSelezionate)
+      const ids = await getRicettaIds('ricetta_categorie', 'id_categoria', categorieSelezionate)
       if (ids.length === 0) { renderList([]); return } // nessuna ricetta corrisponde al filtro
       idLists.push(ids)
     }
 
     if (stagioniSelezionate.length) {
-      const ids = await getRicettaIds('ricetta_stagioni', 'stagione_id', stagioniSelezionate)
+      const ids = await getRicettaIds('ricetta_stagioni', 'id_stagioni', stagioniSelezionate)
       if (ids.length === 0) { renderList([]); return }
       idLists.push(ids)
     }
 
     if (ingredientiSelezionati.length) {
-      const ids = await getRicettaIds('ricetta_ingredienti', 'ingrediente_id', ingredientiSelezionati)
+      const ids = await getRicettaIds('ricetta_ingredienti', 'id_ingredienti', ingredientiSelezionati)
       if (ids.length === 0) { renderList([]); return }
       idLists.push(ids)
     }
@@ -190,10 +190,10 @@
 
       const { data } = await supabase
         .from(table)
-        .select('ricetta_id')
+        .select('id_ricetta')
         .in(column, ids)
 
-      return data.map(r => r.ricetta_id)
+      return data.map(r => r.id_ricetta)
     }
 
     
@@ -218,14 +218,6 @@
       const f = document.getElementById('filters')
       f.style.display = f.style.display === 'none' ? 'block' : 'none'
     })
-
-    document.getElementById('filterToggle').addEventListener('click', () => {
-      const f = document.getElementById('filters')
-      f.style.display = f.style.display === 'none' ? 'block' : 'none'
-      searchInput.focus() // forza il focus sulla barra
-    })
-
-
 
       /* ==========================
         INIT
