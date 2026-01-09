@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dettaglio Ricetta</title>
+</head>
+<body>
+  <a href="index.html" class="back-btn">← Torna alla lista</a>
+  <div id="detailContent" class="loading">Caricamento dettagli...</div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    
+    /* ==========================
+       CONFIG SUPABASE
+    ========================== */
+    const supabaseUrl = 'https://uummgynzxypcscvqtihf.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1bW1neW56eHlwY3NjdnF0aWhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMjE2ODAsImV4cCI6MjA4MjY5NzY4MH0.e0mQ1QZ2B86JsAuy24kIkt43-m6KQz_zj7oYIi8P6I8'
+    const supabase = createClient(supabaseUrl, supabaseKey)
+    const detailContent = document.getElementById('detailContent')
+    
+    /* ==========================
+      RECUPERA ID DALLA URL
+    ========================== */
+    function getRicettaIdFromUrl() {
+      const params = new URLSearchParams(window.location.search)
+      return params.get('id')
+    }
+    
+    /* ==========================
+      CARICAMENTO DETTAGLIO
+    ========================== */
+    async function loadRicettaDetail(ricettaId) {
+      if (!ricettaId) {
+        detailContent.innerHTML = `
+          <div class="error">
+            <h2>Errore</h2>
+            <p>Nessuna ricetta specificata</p>
+            <a href="index.html" class="back-btn">Torna alla lista</a>
+          </div>
+        `
+        return
+      }
+      
+      const { data, error } = await supabase
+        .from('ricetta')
+        .select('*')
+        .eq('id', ricettaId)
+        .single()
+      
+      if (error) {
+        console.error('Errore caricamento dettaglio:', error)
+        detailContent.innerHTML = `
+          <div class="error">
+            <h2>Errore</h2>
+            <p>Impossibile caricare i dettagli della ricetta</p>
+            <a href="index.html" class="back-btn">Torna alla lista</a>
+          </div>
+        `
+        return
+      }
+      
+      // Render del dettaglio
+      detailContent.innerHTML = `
+        <div class="detail-container">
+          <h1>${data.nome}</h1>
+          <div class="rating-badge">⭐ ${Number(data.punteggio).toFixed(1)}</div>
+          
+          <div class="info-grid">
+            <div class="info-item">
+              <strong>Fonte</strong>
+              ${data.fonte || 'Non specificata'}
+            </div>
+            <div class="info-item">
+              <strong>Costo</strong>
+              ${data.costo}/5 ${'💰'.repeat(data.costo)}
+            </div>
+            <div class="info-item">
+              <strong>Gusto</strong>
+              ${data.gusto}/5 ${'😋'.repeat(data.gusto)}
+            </div>
+            <div class="info-item">
+              <strong>Sbattimento</strong>
+              ${data.sbatti}/5 ${'🔨'.repeat(data.sbatti)}
+            </div>
+          </div>
+          
+          ${data.descrizione ? `
+          <div class="detail-section">
+            <h3>📝 Descrizione</h3>
+            <p>${data.descrizione}</p>
+          </div>
+          ` : ''}
+          
+          ${data.consiglietti ? `
+          <div class="detail-section">
+            <h3>💡 Consiglietti</h3>
+            <p>${data.consiglietti}</p>
+          </div>
+          ` : ''}
+          
+          ${data.variazioni ? `
+          <div class="detail-section">
+            <h3>🎨 Variazioni</h3>
+            <p>${data.variazioni}</p>
+          </div>
+          ` : ''}
+        </div>
+      `
+    }
+    
+    /* ==========================
+      INIT
+    ========================== */
+    const ricettaId = getRicettaIdFromUrl()
+    loadRicettaDetail(ricettaId)
+  </script>
+</body>
+</html>
