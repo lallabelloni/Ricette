@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Modifica Ricetta</title>
+</head>
+<body>
+  <a href="edit.html" class="back-btn">← Torna alla lista admin</a>
+  
+  <div id="container" class="loading">Caricamento...</div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    
+    const supabaseUrl = 'https://uummgynzxypcscvqtihf.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1bW1neW56eHlwY3NjdnF0aWhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMjE2ODAsImV4cCI6MjA4MjY5NzY4MH0.e0mQ1QZ2B86JsAuy24kIkt43-m6KQz_zj7oYIi8P6I8'
+    const supabase = createClient(supabaseUrl, supabaseKey)
+    const container = document.getElementById('container')
+    
+    let isEditMode = false
+    let ricettaId = null
+    
+    /* ==========================
+      RECUPERA ID DALLA URL
+    ========================== */
+    function getRicettaIdFromUrl() {
+      const params = new URLSearchParams(window.location.search)
+      return params.get('id')
+    }
+    
+    /* ==========================
+      RENDER FORM
+    ========================== */
+    function renderForm(data = null) {
+      isEditMode = !!data
+      ricettaId = data?.id || null
+      
+      container.innerHTML = `
+        <div class="container">
+          <h1>${isEditMode ? 'Modifica Ricetta' : 'Nuova Ricetta'}</h1>
+          
+          <div id="message"></div>
+          
+          <form id="ricettaForm">
+            <div class="form-group">
+              <label for="nome">Nome Ricetta *</label>
+              <input type="text" id="nome" required value="${data?.nome || ''}">
+            </div>
+            
+            <div class="form-group">
+              <label for="fonte">Fonte</label>
+              <input type="text" id="fonte" value="${data?.fonte || ''}">
+            </div>
+            
+            <div class="form-group">
+              <label for="costo">Costo (1-5) *</label>
+              <input type="number" id="costo" min="1" max="5" required value="${data?.costo || 3}">
+            </div>
+            
+            <div class="form-group">
+              <label for="gusto">Gusto (1-5) *</label>
+              <input type="number" id="gusto" min="1" max="5" required value="${data?.gusto || 3}">
+            </div>
+            
+            <div class="form-group">
+              <label for="sbatti">Sbattimento (1-5) *</label>
+              <input type="number" id="sbatti" min="1" max="5" required value="${data?.sbatti || 3}">
+            </div>
+            
+            <div class="form-group">
+              <label for="punteggio">Punteggio *</label>
+              <input type="number" id="punteggio" step="0.1" min="0" max="10" required value="${data?.punteggio || 5}">
+            </div>
+            
+            <div class="form-group">
+              <label for="descrizione">Descrizione</label>
+              <textarea id="descrizione">${data?.descrizione || ''}</textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="consiglietti">Consiglietti</label>
+              <textarea id="consiglietti">${data?.consiglietti || ''}</textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="variazioni">Variazioni</label>
+              <textarea id="variazioni">${data?.variazioni || ''}</textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">
+              ${isEditMode ? '💾 Salva Modifiche' : '➕ Crea Ricetta'}
+            </button>
+            <a href="edit.html" class="btn btn-secondary">❌ Annulla</a>
+          </form>
+        </div>
+      `
+      
+      // Event listener per il form
+      document.getElementById('ricettaForm').addEventListener('submit', handleSubmit)
+    }
+    
+    /* ==========================
+      CARICA RICETTA
+    ========================== */
+    async function loadRicetta(id) {
+      const { data, error } = await supabase
+        .from('ricetta')
+        .select('*')
+        .eq('id', id)
+        .single()
+      
+      if (error) {
+        console.error('Errore caricamento:', error)
+        container.innerHTML = `
+          <div class="container">
+            <div class="error">Errore nel caricamento della ricetta</div>
+            <a href="edit.html" class="btn btn-secondary">Torna alla lista</a>
+          </div>
+        `
+        return
+      }
+      
+      renderForm(data)
+    }
+    
+    /* ==========================
+      SALVA RICETTA
+    ========================== */
+    async function handleSubmit(e) {
+      e.preventDefault()
+      
+      const formData = {
+        nome: document.getElementById('nome').value.trim(),
+        fonte: document.getElementById('fonte').value.trim() || null,
+        costo: parseInt(document.getElementById('costo').value),
+        gusto: parseInt(document.getElementById('gusto').value),
+        sbatti: parseInt(document.getElementById('sbatti').value),
+        punteggio: parseFloat(document.getElementById('punteggio').value),
+        descrizione: document.getElementById('descrizione').value.trim() || null,
+        consiglietti: document.getElementById('consiglietti').value.trim() || null,
+        variazioni: document.getElementById('variazioni').value.trim() || null
+      }
+      
+      const messageDiv = document.getElementById('message')
+      
+      if (isEditMode) {
+        // UPDATE
+        const { error } = await supabase
+          .from('ricetta')
+          .update(formData)
+          .eq('id', ricettaId)
+        
+        if (error) {
+          console.error('Errore aggiornamento:', error)
+          messageDiv.innerHTML = '<div class="error">Errore durante il salvataggio</div>'
+          return
+        }
+        
+        messageDiv.innerHTML = '<div class="success">✅ Ricetta aggiornata con successo!</div>'
+        setTimeout(() => {
+          window.location.href = 'edit.html'
+        }, 1500)
+        
+      } else {
+        // INSERT
+        const { error } = await supabase
+          .from('ricetta')
+          .insert([formData])
+        
+        if (error) {
+          console.error('Errore inserimento:', error)
+          messageDiv.innerHTML = '<div class="error">Errore durante la creazione</div>'
+          return
+        }
+        
+        messageDiv.innerHTML = '<div class="success">✅ Ricetta creata con successo!</div>'
+        setTimeout(() => {
+          window.location.href = 'edit.html'
+        }, 1500)
+      }
+    }
+    
+    /* ==========================
+      INIT
+    ========================== */
+    const id = getRicettaIdFromUrl()
+    if (id) {
+      loadRicetta(id)
+    } else {
+      renderForm()
+    }
+  </script>
+</body>
+</html>

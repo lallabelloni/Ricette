@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin - Gestione Ricette</title>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>Admin - Gestione Ricette</h1>
+      <input type="text" id="searchInput" placeholder="Cerca ricetta...">
+    </div>
+    <a href="edit-ricetta.html" class="btn btn-primary">+ Nuova Ricetta</a>
+  </div>
+
+  <div id="output" class="loading">Caricamento ricette...</div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    
+    const supabaseUrl = 'https://uummgynzxypcscvqtihf.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1bW1neW56eHlwY3NjdnF0aWhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMjE2ODAsImV4cCI6MjA4MjY5NzY4MH0.e0mQ1QZ2B86JsAuy24kIkt43-m6KQz_zj7oYIi8P6I8'
+    const supabase = createClient(supabaseUrl, supabaseKey)
+    const resultsDiv = document.getElementById('output')
+    const searchInput = document.getElementById('searchInput')
+    
+    /* ==========================
+      RENDER TABELLA
+    ========================== */
+    function renderTable(data) {
+      if (!data || data.length === 0) {
+        resultsDiv.innerHTML = '<p class="loading">Nessuna ricetta trovata</p>'
+        return
+      }
+      
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Fonte</th>
+              <th>Costo</th>
+              <th>Gusto</th>
+              <th>Sbatti</th>
+              <th>Punteggio</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody>
+      `
+      
+      data.forEach(r => {
+        html += `
+          <tr>
+            <td><strong>${r.nome}</strong></td>
+            <td>${r.fonte || '-'}</td>
+            <td>${r.costo}/5</td>
+            <td>${r.gusto}/5</td>
+            <td>${r.sbatti}/5</td>
+            <td>⭐ ${Number(r.punteggio).toFixed(1)}</td>
+            <td class="actions">
+              <a href="ricetta.html?id=${r.id}" class="btn btn-view" target="_blank">👁️ Vedi</a>
+              <a href="edit-ricetta.html?id=${r.id}" class="btn btn-edit">✏️ Modifica</a>
+              <button class="btn btn-delete" onclick="deleteRicetta('${r.id}', '${r.nome}')">🗑️ Elimina</button>
+            </td>
+          </tr>
+        `
+      })
+      
+      html += `
+          </tbody>
+        </table>
+      `
+      
+      resultsDiv.innerHTML = html
+    }
+    
+    /* ==========================
+      CARICA RICETTE
+    ========================== */
+    async function loadRicette(searchQuery = '') {
+      let query = supabase
+        .from('ricetta')
+        .select('id, nome, fonte, costo, gusto, sbatti, punteggio')
+        .order('nome')
+      
+      if (searchQuery) {
+        query = query.ilike('nome', `%${searchQuery}%`)
+      }
+      
+      const { data, error } = await query
+      
+      if (error) {
+        console.error(error)
+        resultsDiv.innerHTML = '<p class="loading">Errore caricamento dati</p>'
+        return
+      }
+      
+      renderTable(data)
+    }
+    
+    /* ==========================
+      ELIMINA RICETTA
+    ========================== */
+    window.deleteRicetta = async function(id, nome) {
+      if (!confirm(`Sei sicuro di voler eliminare "${nome}"?`)) {
+        return
+      }
+      
+      const { error } = await supabase
+        .from('ricetta')
+        .delete()
+        .eq('id', id)
+      
+      if (error) {
+        console.error('Errore eliminazione:', error)
+        alert('Errore durante l\'eliminazione della ricetta')
+        return
+      }
+      
+      alert('Ricetta eliminata con successo!')
+      loadRicette(searchInput.value.trim())
+    }
+    
+    /* ==========================
+      EVENTI
+    ========================== */
+    searchInput.addEventListener('input', (e) => {
+      loadRicette(e.target.value.trim())
+    })
+    
+    /* ==========================
+      INIT
+    ========================== */
+    loadRicette()
+  </script>
+</body>
+</html>
