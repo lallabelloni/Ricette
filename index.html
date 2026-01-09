@@ -78,7 +78,7 @@
     async function loadAllRicette() {
       const { data, error } = await supabase
         .from('ricetta')
-        .select('nome, fonte, costo, gusto, sbatti, punteggio')
+        .select('id, nome, fonte, costo, gusto, sbatti, punteggio')
         .order('punteggio', { ascending: false })
       if (error) {
         console.error(error)
@@ -183,7 +183,7 @@
       // Costruisci la query finale
       let queryBuilder = supabase
         .from('ricetta')
-        .select('nome, fonte, costo, gusto, sbatti, punteggio')
+        .select('id, nome, fonte, costo, gusto, sbatti, punteggio')
         .order('punteggio', { ascending: false })
       
       if (finalIds && finalIds.length > 0) {
