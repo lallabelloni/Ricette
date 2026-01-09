@@ -66,12 +66,14 @@
               <label for="sbatti">Sbattimento (1-5) *</label>
               <input type="number" id="sbatti" min="1" max="5" required value="${data?.sbatti || 3}">
             </div>
-            
+
+            ${data?.punteggio ? `
             <div class="form-group">
-              <label for="punteggio">Punteggio *</label>
-              <input type="number" id="punteggio" step="0.1" min="0" max="10" required value="${data?.punteggio || 5}">
+            <label>Punteggio (calcolato automaticamente)</label>
+            <input type="text" value="⭐ ${Number(data.punteggio).toFixed(1)}" disabled style="background: #f0f0f0;">
             </div>
-            
+            ` : ''}
+
             <div class="form-group">
               <label for="descrizione">Descrizione</label>
               <textarea id="descrizione">${data?.descrizione || ''}</textarea>
@@ -135,7 +137,6 @@
         costo: parseInt(document.getElementById('costo').value),
         gusto: parseInt(document.getElementById('gusto').value),
         sbatti: parseInt(document.getElementById('sbatti').value),
-        punteggio: parseFloat(document.getElementById('punteggio').value),
         descrizione: document.getElementById('descrizione').value.trim() || null,
         consiglietti: document.getElementById('consiglietti').value.trim() || null,
         variazioni: document.getElementById('variazioni').value.trim() || null
