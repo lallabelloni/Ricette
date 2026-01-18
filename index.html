@@ -3,18 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>ricerca la ricetta!</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    #filters { margin: 10px 0; }
-    label { display: block; margin: 5px 0; }
-  </style>
+  <link rel="stylesheet" href="style.css">
+
 </head>
 <body>
   <h1>ricerca la ricetta!</h1>
   <input type="text" id="searchInput" placeholder="Scrivi il nome della ricetta...">
   <button id="searchBtn">Cerca</button>
   <button id="filterToggle">Filtri</button>
-  <div id="filters" style="display:none; border:1px solid #ccc; padding:10px; margin-top:10px">
+  <div id="filters">
     <h3>Categorie</h3>
     <div id="categorie"></div>
     <h3>Stagioni</h3>
@@ -47,7 +44,7 @@
         return
       }
       resultsDiv.innerHTML += `
-        <div class="row header" style="font-weight:bold; margin-bottom:10px">
+        <div class="row header">
           Nome | Fonte | Costo | Gusto | Sbatti | Punteggio
         </div>
       `
