@@ -43,14 +43,17 @@
         resultsDiv.innerHTML = '<p>Nessun risultato</p>'
         return
       }
-      <div class="row header grid">
-        <span>Nome</span>
-        <span>Fonte</span>
-        <span>Costo</span>
-        <span>Gusto</span>
-        <span>Sbatti</span>
-        <span>Punteggio</span>
-      </div>
+      resultsDiv.innerHTML += `
+        <div class="row header grid">
+          <span>Nome</span>
+          <span>Fonte</span>
+          <span>Costo</span>
+          <span>Gusto</span>
+          <span>Sbatti</span>
+          <span>Punteggio</span>
+        </div>
+      `
+      
 
       /*
       resultsDiv.innerHTML += `
