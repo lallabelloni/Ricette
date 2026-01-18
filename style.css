@@ -226,65 +226,54 @@ button:hover {
   }
 
   h1 {
-    font-size: 26px;
-    margin-bottom: 12px;
+    font-size: 28px;
+    margin-bottom: 14px;
   }
 
-  /* SEARCH BAR */
+  /* SEARCH */
   .search-bar {
-    gap: 10px;
+    flex-direction: column;
+    gap: 12px;
   }
 
   #searchInput {
-    font-size: 16px;
-    padding: 14px 14px;
-    border-radius: 6px;
+    width: 100%;
+    font-size: 18px;
+    padding: 14px;
   }
 
   button {
-    font-size: 16px;
-    padding: 14px 18px;
-    border-radius: 6px;
-  }
-
-  #filterToggle {
     width: 100%;
-  }
-
-  /* FILTRI */
-  #filters {
-    margin-top: 14px;
-  }
-
-  .filter-title {
     font-size: 18px;
-    padding: 14px 14px 14px 48px;
+    padding: 16px;
   }
 
-  .filter-title::before {
-    font-size: 20px;
-    left: 18px;
-  }
-
-  .filter-content label {
-    font-size: 16px;
-    padding: 8px 0;
-  }
-
-  /* RISULTATI */
+  /* NASCONDI HEADER TABELLA */
   .row.header {
     display: none;
   }
 
-  .grid,
+  /* CARD RICETTA */
   .ricetta-item {
-    grid-template-columns: 1fr;
-    row-gap: 10px;
+    display: block;
+    padding: 16px;
+    font-size: 17px;
   }
 
-  .ricetta-item {
-    font-size: 16px;
-    padding: 14px;
+  /* CONTENUTO INTERNO: VERTICALE */
+  .ricetta-item > div {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
   }
+
+  /* NOME RICETTA */
+  .ricetta-item > div:first-child {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
 }
+
 
