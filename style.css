@@ -219,7 +219,7 @@ button:hover {
 /* =========================
    MOBILE
 ========================= */
-@media (max-width: 767px) {
+@media (max-width: 767px) , (pointer: coarse){
 
   body {
     padding: 16px;
