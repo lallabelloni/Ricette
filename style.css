@@ -63,8 +63,8 @@ h1 {
 
 .filter-title {
   cursor: pointer;
-  padding: 10px 10px 10px 36px; /* spazio per la freccia */
   position: relative;
+  padding: 10px 12px 10px 40px; /* spazio reale per la freccia */
   user-select: none;
 }
 
@@ -139,10 +139,10 @@ button:hover {
 /* titoli sezioni */
 #filters h3 {
   margin: 0;
-  padding: 10px;
   border-top: 1px solid rgba(255,255,255,0.3);
   font-size: 16px;
 }
+
 
 /* checkbox list */
 #filters label {
