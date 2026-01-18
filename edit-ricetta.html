@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <title>Modifica Ricetta</title>
+  <link rel="stylesheet" href="style-edit-ricetta.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
 </head>
 <body>
-  <a href="edit-index.html" class="back-btn">← Torna alla lista admin</a>
+  <a href="edit.html" class="back-btn">← Torna alla lista admin</a>
   
   <div id="container" class="loading">Caricamento...</div>
 
@@ -93,7 +96,7 @@
             <button type="submit" class="btn btn-primary">
               ${isEditMode ? '💾 Salva Modifiche' : '➕ Crea Ricetta'}
             </button>
-            <a href="edit-index.html" class="btn btn-secondary">❌ Annulla</a>
+            <a href="edit.html" class="btn btn-secondary">❌ Annulla</a>
           </form>
         </div>
       `
@@ -117,7 +120,7 @@
         container.innerHTML = `
           <div class="container">
             <div class="error">Errore nel caricamento della ricetta</div>
-            <a href="edit-index.html" class="btn btn-secondary">Torna alla lista</a>
+            <a href="edit.html" class="btn btn-secondary">Torna alla lista</a>
           </div>
         `
         return
@@ -160,7 +163,7 @@
         
         messageDiv.innerHTML = '<div class="success">✅ Ricetta aggiornata con successo!</div>'
         setTimeout(() => {
-          window.location.href = 'edit-index.html'
+          window.location.href = 'edit.html'
         }, 1500)
         
       } else {
@@ -177,7 +180,7 @@
         
         messageDiv.innerHTML = '<div class="success">✅ Ricetta creata con successo!</div>'
         setTimeout(() => {
-          window.location.href = 'edit-index.html'
+          window.location.href = 'edit.html'
         }, 1500)
       }
     }
