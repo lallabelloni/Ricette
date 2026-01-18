@@ -220,33 +220,71 @@ button:hover {
    MOBILE
 ========================= */
 @media (max-width: 767px) {
-  .grid,
-  .ricetta-item {
-    grid-template-columns: 1fr 1fr;
-    row-gap: 6px;
-  }
 
   body {
-    padding: 10px;
+    padding: 16px;
   }
 
   h1 {
-    font-size: 22px;
+    font-size: 26px;
+    margin-bottom: 12px;
+  }
+
+  /* SEARCH BAR */
+  .search-bar {
+    gap: 10px;
+  }
+
+  #searchInput {
+    font-size: 16px;
+    padding: 14px 14px;
+    border-radius: 6px;
+  }
+
+  button {
+    font-size: 16px;
+    padding: 14px 18px;
+    border-radius: 6px;
   }
 
   #filterToggle {
     width: 100%;
   }
 
+  /* FILTRI */
   #filters {
-    margin-top: 10px;
+    margin-top: 14px;
   }
 
+  .filter-title {
+    font-size: 18px;
+    padding: 14px 14px 14px 48px;
+  }
+
+  .filter-title::before {
+    font-size: 20px;
+    left: 18px;
+  }
+
+  .filter-content label {
+    font-size: 16px;
+    padding: 8px 0;
+  }
+
+  /* RISULTATI */
   .row.header {
     display: none;
   }
 
+  .grid,
   .ricetta-item {
-    font-size: 14px;
+    grid-template-columns: 1fr;
+    row-gap: 10px;
+  }
+
+  .ricetta-item {
+    font-size: 16px;
+    padding: 14px;
   }
 }
+
