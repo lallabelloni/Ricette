@@ -219,6 +219,9 @@ button:hover {
 /* =========================
    MOBILE
 ========================= */
+/* =========================
+   MOBILE
+========================= */
 @media (max-width: 767px) , (pointer: coarse){
 
   body {
@@ -232,9 +235,9 @@ button:hover {
 
   /* SEARCH BAR SU UNA RIGA */
   .search-bar {
-    flex-direction: row;
-    align-items: center;
     gap: 8px;
+    max-width: 100%;
+    justify-content: flex-start;
   }
 
   /* INPUT PIÙ COMPATTO */
@@ -246,7 +249,7 @@ button:hover {
   }
 
   /* BOTTONI = ICONE */
-  #searchButton,
+  #searchBtn,
   #filterToggle {
     flex-shrink: 0;
     width: 44px;
@@ -260,7 +263,7 @@ button:hover {
   }
 
   /* ICONA LENTE */
-  #searchButton::before {
+  #searchBtn::before {
     content: "🔍";
     font-size: 20px;
   }
@@ -269,6 +272,11 @@ button:hover {
   #filterToggle::before {
     content: "☰";
     font-size: 22px;
+  }
+
+  /* FILTRI A TUTTA LARGHEZZA SU MOBILE */
+  #filters {
+    max-width: 100%;
   }
 
   /* NASCONDI HEADER TABELLA */
