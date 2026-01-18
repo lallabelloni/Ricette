@@ -1,0 +1,202 @@
+/* =========================
+   RESET + BASE
+========================= */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 16px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: #5a4f44;
+  color: #3b2f25;
+}
+
+/* =========================
+   BACK BUTTON
+========================= */
+.back-btn {
+  display: inline-block;
+  color: #f2c300;
+  text-decoration: none;
+  font-size: 16px;
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  background-color: rgba(242, 195, 0, 0.1);
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.back-btn:hover {
+  background-color: rgba(242, 195, 0, 0.2);
+}
+
+/* =========================
+   CONTAINER PRINCIPALE
+========================= */
+.detail-container {
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: #5a4f44;
+}
+
+/* =========================
+   HEADER RICETTA
+========================= */
+.detail-container h1 {
+  color: #f2c300;
+  text-transform: uppercase;
+  font-size: 32px;
+  letter-spacing: 1px;
+  margin: 0 0 8px 0;
+  text-shadow: 1px 1px 0 #6b4a2f;
+  text-align: center;
+}
+
+/* Immagine header (se presente) */
+.recipe-image {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+/* =========================
+   RATING BADGE
+========================= */
+.rating-badge {
+  background-color: #b97a57;
+  color: #fff;
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* =========================
+   INFO GRID (punteggi)
+========================= */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.info-item {
+  background-color: #a36d50;
+  color: #fff;
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.info-item strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* =========================
+   SEZIONI DETTAGLIO
+========================= */
+.detail-section {
+  background-color: #c9c0af;
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.detail-section h3 {
+  color: #3b2f25;
+  font-size: 18px;
+  margin: 0 0 10px 0;
+}
+
+.detail-section p {
+  color: #3b2f25;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* =========================
+   LOADING & ERROR
+========================= */
+.loading,
+.error {
+  text-align: center;
+  padding: 40px 20px;
+  color: #f2c300;
+}
+
+.error h2 {
+  color: #f2c300;
+}
+
+.error p {
+  color: #c9c0af;
+}
+
+/* =========================
+   DESKTOP (> 768px)
+========================= */
+@media (min-width: 768px) {
+  body {
+    padding: 24px;
+  }
+
+  .detail-container h1 {
+    font-size: 48px;
+    margin-bottom: 12px;
+  }
+
+  .info-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .detail-section {
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .detail-section h3 {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
+  /* Layout a due colonne per consiglietti e variazioni */
+  .two-column-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .back-btn {
+    font-size: 18px;
+    padding: 10px 16px;
+  }
+}
+
+/* =========================
+   MOBILE SPECIFICO
+========================= */
+@media (max-width: 767px) {
+  .detail-container h1 {
+    font-size: 28px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .rating-badge {
+    font-size: 16px;
+    padding: 5px 14px;
+  }
+}
