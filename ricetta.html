@@ -94,6 +94,13 @@
             <p>${data.descrizione}</p>
           </div>
           ` : ''}
+
+          ${data.procedimento ? `
+          <div class="detail-section">
+            <h3>Procedimento</h3>
+            <p>${data.procedimento}</p>
+          </div>
+          ` : ''}
           
           ${data.consiglietti ? `
           <div class="detail-section">
