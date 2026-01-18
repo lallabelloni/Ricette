@@ -8,6 +8,31 @@
 </head>
 <body>
   <h1>ricerca la ricetta!</h1>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Scrivi il nome della ricetta...">
+    <button id="searchBtn">Cerca</button>
+    <button id="filterToggle">Filtri</button>
+  </div>
+
+  <div id="filters" style="display:none">
+  <div class="filter-group">
+    <h3 class="filter-title">Categorie</h3>
+    <div id="categorie" class="filter-content"></div>
+  </div>
+
+  <div class="filter-group">
+    <h3 class="filter-title">Stagioni</h3>
+    <div id="stagioni" class="filter-content"></div>
+  </div>
+
+  <div class="filter-group">
+    <h3 class="filter-title">Ingredienti</h3>
+    <div id="ingredienti" class="filter-content"></div>
+  </div>
+</div>
+
+
+  <!-- 
   <input type="text" id="searchInput" placeholder="Scrivi il nome della ricetta...">
   <button id="searchBtn">Cerca</button>
   <button id="filterToggle">Filtri</button>
@@ -19,6 +44,7 @@
     <h3>Ingredienti</h3>
     <div id="ingredienti"></div>
   </div>
+  -->
   <div id="output">Caricamento...</div>
 
   <script type="module">
@@ -270,7 +296,14 @@
       const f = document.getElementById('filters')
       f.style.display = f.style.display === 'none' ? 'block' : 'none'
     })
-    
+
+    // Apertura/chiusura tendine filtri
+    document.querySelectorAll('.filter-title').forEach(title => {
+      title.addEventListener('click', () => {
+        title.parentElement.classList.toggle('open')
+      })
+    })
+
     /* ==========================
       INIT
     ========================== */
