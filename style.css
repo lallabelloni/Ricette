@@ -63,32 +63,32 @@ h1 {
 
 .filter-title {
   cursor: pointer;
-  padding: 10px;
+  padding: 10px 10px 10px 36px; /* spazio per la freccia */
   position: relative;
+  user-select: none;
 }
 
-/* triangolino */
 .filter-title::before {
   content: "▸";
   position: absolute;
-  left: 10px;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   transition: transform 0.2s ease;
 }
 
 .filter-group.open .filter-title::before {
-  transform: rotate(90deg);
+  transform: translateY(-50%) rotate(90deg);
 }
 
-/* contenuto chiuso */
 .filter-content {
   display: none;
   padding: 8px 10px;
 
-  /* colonne automatiche */
-  display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 6px 12px;
 }
+
 
 .filter-group.open .filter-content {
   display: grid;
