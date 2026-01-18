@@ -43,11 +43,22 @@
         resultsDiv.innerHTML = '<p>Nessun risultato</p>'
         return
       }
+      <div class="row header grid">
+        <span>Nome</span>
+        <span>Fonte</span>
+        <span>Costo</span>
+        <span>Gusto</span>
+        <span>Sbatti</span>
+        <span>Punteggio</span>
+      </div>
+
+      /*
       resultsDiv.innerHTML += `
         <div class="row header">
           Nome | Fonte | Costo | Gusto | Sbatti | Punteggio
         </div>
-      `
+      */
+
       /*data.forEach(r => {
         resultsDiv.innerHTML += `
           <div style="padding:5px; border-bottom:1px solid #eee">
@@ -59,8 +70,14 @@
         const div = document.createElement('div')
         div.className = 'ricetta-item'
         div.innerHTML = `
-          ${r.nome} | ${r.fonte ?? '-'} | costo: ${r.costo} | gusto: ${r.gusto} | sbatti: ${r.sbatti} | ⭐: ${Number(r.punteggio)}
+          <span>${r.nome}</span>
+          <span>${r.fonte ?? '-'}</span>
+          <span>${r.costo}</span>
+          <span>${r.gusto}</span>
+          <span>${r.sbatti}</span>
+          <span>⭐ ${Number(r.punteggio)}</span>
         `
+
         // Quando clicchi, vai alla pagina dettaglio passando l'ID
         div.addEventListener('click', () => {
           window.location.href = `ricetta.html?id=${r.id}`

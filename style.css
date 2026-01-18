@@ -24,17 +24,32 @@ body > button,
   margin-left: auto;
   margin-right: auto;
 }
+h1 {
+  text-transform: uppercase;
+  position: relative;
+  text-shadow: 
+    1px 1px 0 #6b4a2f; /* contorno offset basso-destra */
+}
 
+/*
 h1 {
   text-align: center;
-  color: #f2c300; /* giallo titolo */
+  color: #f2c300; // giallo titolo 
   letter-spacing: 1px;
   margin-top: 20px;
 }
+*/
 
 /* =========================
    SEARCH BAR
 ========================= */
+#searchInput {
+  display: block;
+  margin: 12px auto 0 auto;
+  max-width: 600px;
+}
+
+/*
 #searchInput {
   width: 100%;
   padding: 10px 12px;
@@ -42,6 +57,7 @@ h1 {
   border-radius: 4px;
   margin-top: 10px;
 }
+*/
 
 button {
   background-color: #b97a57;
@@ -117,6 +133,21 @@ button:hover {
 .ricetta-item:hover {
   filter: brightness(1.05);
 }
+/* =========================
+   GRID
+========================= */
+.grid {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.ricetta-item {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 1fr;
+}
+
 
 /* =========================
    DESKTOP
@@ -136,6 +167,11 @@ button:hover {
    MOBILE
 ========================= */
 @media (max-width: 767px) {
+  .grid,
+  .ricetta-item {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 6px;
+  }
 
   body {
     padding: 10px;
