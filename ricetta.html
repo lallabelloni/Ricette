@@ -26,7 +26,215 @@
       RECUPERA ID DALLA URL
     ========================== */
     function getRicettaIdFromUrl() {
+      const params = new URLSearchParams(window.location.search)<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dettaglio Ricetta</title>
+  <link rel="stylesheet" href="style-ricetta.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<body>
+  <a href="index.html" class="back-btn">← Torna alla lista</a>
+  <div id="detailContent" class="loading">Caricamento dettagli...</div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    
+    /* ==========================
+       CONFIG SUPABASE
+    ========================== */
+    const supabaseUrl = 'https://uummgynzxypcscvqtihf.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1bW1neW56eHlwY3NjdnF0aWhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMjE2ODAsImV4cCI6MjA4MjY5NzY4MH0.e0mQ1QZ2B86JsAuy24kIkt43-m6KQz_zj7oYIi8P6I8'
+    const supabase = createClient(supabaseUrl, supabaseKey)
+    const detailContent = document.getElementById('detailContent')
+    
+    /* ==========================
+      RECUPERA ID DALLA URL
+    ========================== */
+    function getRicettaIdFromUrl() {
       const params = new URLSearchParams(window.location.search)
+      return params.get('id')
+    }
+    
+    /* ==========================
+      CARICAMENTO TAG
+    ========================== */
+    async function loadTags(ricettaId) {
+      // Carica ingredienti
+      const { data: ingredienti } = await supabase
+        .from('ricetta_ingredienti')
+        .select('ingredienti(nome)')
+        .eq('ricetta_id', ricettaId)
+      
+      // Carica categorie
+      const { data: categorie } = await supabase
+        .from('ricetta_categorie')
+        .select('categorie(nome)')
+        .eq('ricetta_id', ricettaId)
+      
+      // Carica stagioni
+      const { data: stagioni } = await supabase
+        .from('ricetta_stagioni')
+        .select('stagioni(nome)')
+        .eq('ricetta_id', ricettaId)
+      
+      return {
+        ingredienti: ingredienti?.map(i => i.ingredienti.nome) || [],
+        categorie: categorie?.map(c => c.categorie.nome) || [],
+        stagioni: stagioni?.map(s => s.stagioni.nome) || []
+      }
+    }
+    
+    /* ==========================
+      GENERA HTML TAG
+    ========================== */
+    function renderTags(tags) {
+      let html = '<div class="tags-container">'
+      
+      // Ingredienti
+      if (tags.ingredienti.length > 0) {
+        html += `
+          <div class="tag-section">
+            <h4>Ingredienti:</h4>
+            <div class="tags">
+              ${tags.ingredienti.map(tag => `<span class="tag tag-ingrediente">${tag}</span>`).join('')}
+            </div>
+          </div>
+        `
+      }
+      
+      // Categorie
+      if (tags.categorie.length > 0) {
+        html += `
+          <div class="tag-section">
+            <h4>Categorie:</h4>
+            <div class="tags">
+              ${tags.categorie.map(tag => `<span class="tag tag-categoria">${tag}</span>`).join('')}
+            </div>
+          </div>
+        `
+      }
+      
+      // Stagioni
+      if (tags.stagioni.length > 0) {
+        html += `
+          <div class="tag-section">
+            <h4>Stagioni:</h4>
+            <div class="tags">
+              ${tags.stagioni.map(tag => `<span class="tag tag-stagione">${tag}</span>`).join('')}
+            </div>
+          </div>
+        `
+      }
+      
+      html += '</div>'
+      return html
+    }
+    
+    /* ==========================
+      CARICAMENTO DETTAGLIO
+    ========================== */
+    async function loadRicettaDetail(ricettaId) {
+      if (!ricettaId) {
+        detailContent.innerHTML = `
+          <div class="error">
+            <h2>Errore</h2>
+            <p>Nessuna ricetta specificata</p>
+            <a href="index.html" class="back-btn">Torna alla lista</a>
+          </div>
+        `
+        return
+      }
+      
+      const { data, error } = await supabase
+        .from('ricetta')
+        .select('*')
+        .eq('id', ricettaId)
+        .single()
+      
+      if (error) {
+        console.error('Errore caricamento dettaglio:', error)
+        detailContent.innerHTML = `
+          <div class="error">
+            <h2>Errore</h2>
+            <p>Impossibile caricare i dettagli della ricetta</p>
+            <a href="index.html" class="back-btn">Torna alla lista</a>
+          </div>
+        `
+        return
+      }
+      
+      // Carica i tag
+      const tags = await loadTags(ricettaId)
+      
+      // Render del dettaglio
+      detailContent.innerHTML = `
+        <div class="detail-container">
+          <h1>${data.nome}</h1>
+          <div class="rating-badge">⭐ ${Number(data.punteggio).toFixed(1)}</div>
+          
+          ${renderTags(tags)}
+          
+          <div class="info-grid">
+            <div class="info-item">
+              <strong>Fonte</strong>
+              ${data.fonte || 'Non specificata'}
+            </div>
+            <div class="info-item">
+              <strong>Costo</strong>
+              ${data.costo}/5 ${'💰'.repeat(data.costo)}
+            </div>
+            <div class="info-item">
+              <strong>Gusto</strong>
+              ${data.gusto}/5 ${'😋'.repeat(data.gusto)}
+            </div>
+            <div class="info-item">
+              <strong>Sbattimento</strong>
+              ${data.sbatti}/5 ${'🔨'.repeat(data.sbatti)}
+            </div>
+          </div>
+          
+          ${data.descrizione ? `
+          <div class="detail-section">
+            <h3>Descrizione</h3>
+            <p>${data.descrizione}</p>
+          </div>
+          ` : ''}
+
+          ${data.procedimento ? `
+          <div class="detail-section">
+            <h3>Procedimento</h3>
+            <p>${data.procedimento}</p>
+          </div>
+          ` : ''}
+          
+          ${data.consiglietti ? `
+          <div class="detail-section">
+            <h3>Consiglietti</h3>
+            <p>${data.consiglietti}</p>
+          </div>
+          ` : ''}
+          
+          ${data.variazioni ? `
+          <div class="detail-section">
+            <h3>Variazioni</h3>
+            <p>${data.variazioni}</p>
+          </div>
+          ` : ''}
+        </div>
+      `
+    }
+    
+    /* ==========================
+      INIT
+    ========================== */
+    const ricettaId = getRicettaIdFromUrl()
+    loadRicettaDetail(ricettaId)
+  </script>
+</body>
+</html>
       return params.get('id')
     }
     

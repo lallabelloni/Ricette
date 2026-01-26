@@ -2,23 +2,27 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>Dettaglio Ricetta</title>
-  <link rel="stylesheet" href="style-ricetta.css">
+  <title>Modifica Ricetta</title>
+  <link rel="stylesheet" href="style-edit-ricetta.css">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
 </head>
 <body>
-  <a href="index.html" class="back-btn">← Torna alla lista</a>
-  <div id="detailContent" class="loading">Caricamento dettagli...</div>
+  <a href="edit.html" class="back-btn">← Torna alla lista admin</a>
+  
+  <div id="container" class="loading">Caricamento...</div>
+
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
     
-    /* ==========================
-       CONFIG SUPABASE
-    ========================== */
     const supabaseUrl = 'https://uummgynzxypcscvqtihf.supabase.co'
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1bW1neW56eHlwY3NjdnF0aWhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMjE2ODAsImV4cCI6MjA4MjY5NzY4MH0.e0mQ1QZ2B86JsAuy24kIkt43-m6KQz_zj7oYIi8P6I8'
+    // special key
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1bW1neW56eHlwY3NjdnF0aWhmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzEyMTY4MCwiZXhwIjoyMDgyNjk3NjgwfQ._aMNw1Ysu5V3IgzMV2k7E-wMi7beulBzKhbj-QZYszM'
     const supabase = createClient(supabaseUrl, supabaseKey)
-    const detailContent = document.getElementById('detailContent')
+    const container = document.getElementById('container')
+    
+    let isEditMode = false
+    let ricettaId = null
     
     /* ==========================
       RECUPERA ID DALLA URL
@@ -29,201 +33,172 @@
     }
     
     /* ==========================
-      CARICA INGREDIENTI
+      RENDER FORM
     ========================== */
-    async function loadIngredienti(ricettaId) {
-      const { data, error } = await supabase
-        .from('ricetta_ingredienti')
-        .select('ingredienti(nome)')
-        .eq('ricetta_id', ricettaId)
+    function renderForm(data = null) {
+      isEditMode = !!data
+      ricettaId = data?.id || null
       
-      if (error) {
-        console.error('Errore caricamento ingredienti:', error)
-        return []
-      }
-      return data.map(item => item.ingredienti.nome)
+      container.innerHTML = `
+        <div class="container">
+          <h1>${isEditMode ? 'Modifica Ricetta' : 'Nuova Ricetta'}</h1>
+          
+          <div id="message"></div>
+          
+          <form id="ricettaForm">
+            <div class="form-group">
+              <label for="nome">Nome Ricetta *</label>
+              <input type="text" id="nome" required value="${data?.nome || ''}">
+            </div>
+            
+            <div class="form-group">
+              <label for="fonte">Fonte</label>
+              <input type="text" id="fonte" value="${data?.fonte || ''}">
+            </div>
+            
+            <div class="form-group">
+              <label for="costo">Costo (1-5) *</label>
+              <input type="number" id="costo" min="1" max="5" required value="${data?.costo || 3}">
+            </div>
+            
+            <div class="form-group">
+              <label for="gusto">Gusto (1-5) *</label>
+              <input type="number" id="gusto" min="1" max="5" required value="${data?.gusto || 3}">
+            </div>
+            
+            <div class="form-group">
+              <label for="sbatti">Sbattimento (1-5) *</label>
+              <input type="number" id="sbatti" min="1" max="5" required value="${data?.sbatti || 3}">
+            </div>
+
+            ${data?.punteggio ? `
+            <div class="form-group">
+            <label>Punteggio (calcolato automaticamente)</label>
+            <input type="text" value="⭐ ${Number(data.punteggio).toFixed(1)}" disabled style="background: #f0f0f0;">
+            </div>
+            ` : ''}
+
+            <div class="form-group">
+              <label for="descrizione">Descrizione</label>
+              <textarea id="descrizione">${data?.descrizione || ''}</textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="procedimento">Procedimento</label>
+              <textarea id="procedimento">${data?.procedimento || ''}</textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="consiglietti">Consiglietti</label>
+              <textarea id="consiglietti">${data?.consiglietti || ''}</textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="variazioni">Variazioni</label>
+              <textarea id="variazioni">${data?.variazioni || ''}</textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">
+              ${isEditMode ? '💾 Salva Modifiche' : '➕ Crea Ricetta'}
+            </button>
+            <a href="edit.html" class="btn btn-secondary">❌ Annulla</a>
+          </form>
+        </div>
+      `
+      
+      // Event listener per il form
+      document.getElementById('ricettaForm').addEventListener('submit', handleSubmit)
     }
     
     /* ==========================
-      CARICA CATEGORIE
+      CARICA RICETTA
     ========================== */
-    async function loadCategorie(ricettaId) {
-      const { data, error } = await supabase
-        .from('ricetta_categorie')
-        .select('categorie(nome)')
-        .eq('ricetta_id', ricettaId)
-      
-      if (error) {
-        console.error('Errore caricamento categorie:', error)
-        return []
-      }
-      return data.map(item => item.categorie.nome)
-    }
-    
-    /* ==========================
-      CARICA STAGIONI
-    ========================== */
-    async function loadStagioni(ricettaId) {
-      const { data, error } = await supabase
-        .from('ricetta_stagioni')
-        .select('stagioni(nome)')
-        .eq('ricetta_id', ricettaId)
-      
-      if (error) {
-        console.error('Errore caricamento stagioni:', error)
-        return []
-      }
-      return data.map(item => item.stagioni.nome)
-    }
-    
-    /* ==========================
-      GENERA HTML TAGS
-    ========================== */
-    function generateTagsHTML(ingredienti, categorie, stagioni) {
-      let html = '<div class="tags-container">'
-      
-      // Ingredienti
-      if (ingredienti.length > 0) {
-        html += '<div class="tags-section">'
-        html += '<div class="tags-section-title">Ingredienti:</div>'
-        html += '<div class="tags-list">'
-        ingredienti.forEach(ing => {
-          html += `<span class="tag tag-ingrediente">${ing}</span>`
-        })
-        html += '</div></div>'
-      }
-      
-      // Categorie
-      if (categorie.length > 0) {
-        html += '<div class="tags-section">'
-        html += '<div class="tags-section-title">Categorie:</div>'
-        html += '<div class="tags-list">'
-        categorie.forEach(cat => {
-          html += `<span class="tag tag-categoria">${cat}</span>`
-        })
-        html += '</div></div>'
-      }
-      
-      // Stagioni
-      if (stagioni.length > 0) {
-        html += '<div class="tags-section">'
-        html += '<div class="tags-section-title">Stagioni:</div>'
-        html += '<div class="tags-list">'
-        stagioni.forEach(stag => {
-          html += `<span class="tag tag-stagione">${stag}</span>`
-        })
-        html += '</div></div>'
-      }
-      
-      html += '</div>'
-      return html
-    }
-    
-    /* ==========================
-      CARICAMENTO DETTAGLIO
-    ========================== */
-    async function loadRicettaDetail(ricettaId) {
-      if (!ricettaId) {
-        detailContent.innerHTML = `
-          <div class="error">
-            <h2>Errore</h2>
-            <p>Nessuna ricetta specificata</p>
-            <a href="index.html" class="back-btn">Torna alla lista</a>
-          </div>
-        `
-        return
-      }
-      
+    async function loadRicetta(id) {
       const { data, error } = await supabase
         .from('ricetta')
         .select('*')
-        .eq('id', ricettaId)
+        .eq('id', id)
         .single()
       
       if (error) {
-        console.error('Errore caricamento dettaglio:', error)
-        detailContent.innerHTML = `
-          <div class="error">
-            <h2>Errore</h2>
-            <p>Impossibile caricare i dettagli della ricetta</p>
-            <a href="index.html" class="back-btn">Torna alla lista</a>
+        console.error('Errore caricamento:', error)
+        container.innerHTML = `
+          <div class="container">
+            <div class="error">Errore nel caricamento della ricetta</div>
+            <a href="edit.html" class="btn btn-secondary">Torna alla lista</a>
           </div>
         `
         return
       }
       
-      // Carica i tags in parallelo
-      const [ingredienti, categorie, stagioni] = await Promise.all([
-        loadIngredienti(ricettaId),
-        loadCategorie(ricettaId),
-        loadStagioni(ricettaId)
-      ])
+      renderForm(data)
+    }
+    
+    /* ==========================
+      SALVA RICETTA
+    ========================== */
+    async function handleSubmit(e) {
+      e.preventDefault()
       
-      // Genera HTML per i tags
-      const tagsHTML = generateTagsHTML(ingredienti, categorie, stagioni)
+      const formData = {
+        nome: document.getElementById('nome').value.trim(),
+        fonte: document.getElementById('fonte').value.trim() || null,
+        costo: parseInt(document.getElementById('costo').value),
+        gusto: parseInt(document.getElementById('gusto').value),
+        sbatti: parseInt(document.getElementById('sbatti').value),
+        descrizione: document.getElementById('descrizione').value.trim() || null,
+        consiglietti: document.getElementById('consiglietti').value.trim() || null,
+        variazioni: document.getElementById('variazioni').value.trim() || null
+      }
       
-      // Render del dettaglio
-      detailContent.innerHTML = `
-        <div class="detail-container">
-          <h1>${data.nome}</h1>
-          <div class="rating-badge">⭐ ${Number(data.punteggio).toFixed(1)}</div>
-          
-          ${tagsHTML}
-          
-          <div class="info-grid">
-            <div class="info-item">
-              <strong>Fonte</strong>
-              ${data.fonte || 'Non specificata'}
-            </div>
-            <div class="info-item">
-              <strong>Costo</strong>
-              ${data.costo}/5 ${'💰'.repeat(data.costo)}
-            </div>
-            <div class="info-item">
-              <strong>Gusto</strong>
-              ${data.gusto}/5 ${'😋'.repeat(data.gusto)}
-            </div>
-            <div class="info-item">
-              <strong>Sbattimento</strong>
-              ${data.sbatti}/5 ${'🔨'.repeat(data.sbatti)}
-            </div>
-          </div>
-          
-          ${data.descrizione ? `
-          <div class="detail-section">
-            <h3>Descrizione</h3>
-            <p>${data.descrizione}</p>
-          </div>
-          ` : ''}
-          ${data.procedimento ? `
-          <div class="detail-section">
-            <h3>Procedimento</h3>
-            <p>${data.procedimento}</p>
-          </div>
-          ` : ''}
-          
-          ${data.consiglietti ? `
-          <div class="detail-section">
-            <h3>Consiglietti</h3>
-            <p>${data.consiglietti}</p>
-          </div>
-          ` : ''}
-          
-          ${data.variazioni ? `
-          <div class="detail-section">
-            <h3>Variazioni</h3>
-            <p>${data.variazioni}</p>
-          </div>
-          ` : ''}
-        </div>
-      `
+      const messageDiv = document.getElementById('message')
+      
+      if (isEditMode) {
+        // UPDATE
+        const { error } = await supabase
+          .from('ricetta')
+          .update(formData)
+          .eq('id', ricettaId)
+        
+        if (error) {
+          console.error('Errore aggiornamento:', error)
+          messageDiv.innerHTML = '<div class="error">Errore durante il salvataggio</div>'
+          return
+        }
+        
+        messageDiv.innerHTML = '<div class="success">✅ Ricetta aggiornata con successo!</div>'
+        setTimeout(() => {
+          window.location.href = 'edit.html'
+        }, 1500)
+        
+      } else {
+        // INSERT
+        const { error } = await supabase
+          .from('ricetta')
+          .insert([formData])
+        
+        if (error) {
+          console.error('Errore inserimento:', error)
+          messageDiv.innerHTML = '<div class="error">Errore durante la creazione</div>'
+          return
+        }
+        
+        messageDiv.innerHTML = '<div class="success">✅ Ricetta creata con successo!</div>'
+        setTimeout(() => {
+          window.location.href = 'edit.html'
+        }, 1500)
+      }
     }
     
     /* ==========================
       INIT
     ========================== */
-    const ricettaId = getRicettaIdFromUrl()
-    loadRicettaDetail(ricettaId)
+    const id = getRicettaIdFromUrl()
+    if (id) {
+      loadRicetta(id)
+    } else {
+      renderForm()
+    }
   </script>
 </body>
 </html>
