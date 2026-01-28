@@ -5,7 +5,6 @@
   <title>Dettaglio Ricetta</title>
   <link rel="stylesheet" href="style-ricetta.css">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
 </head>
 <body>
   <a href="index.html" class="back-btn">← Torna alla lista</a>
@@ -21,6 +20,15 @@
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1bW1neW56eHlwY3NjdnF0aWhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMjE2ODAsImV4cCI6MjA4MjY5NzY4MH0.e0mQ1QZ2B86JsAuy24kIkt43-m6KQz_zj7oYIi8P6I8'
     const supabase = createClient(supabaseUrl, supabaseKey)
     const detailContent = document.getElementById('detailContent')
+    
+    /* ==========================
+      HELPER: Escape HTML e preserva newlines
+    ========================== */
+    function escapeHtml(text) {
+      const div = document.createElement('div')
+      div.textContent = text
+      return div.innerHTML
+    }
     
     /* ==========================
       RECUPERA ID DALLA URL
@@ -66,13 +74,13 @@
       // Render del dettaglio
       detailContent.innerHTML = `
         <div class="detail-container">
-          <h1>${data.nome}</h1>
+          <h1>${escapeHtml(data.nome)}</h1>
           <div class="rating-badge">⭐ ${Number(data.punteggio).toFixed(1)}</div>
           
           <div class="info-grid">
             <div class="info-item">
               <strong>Fonte</strong>
-              ${data.fonte || 'Non specificata'}
+              ${escapeHtml(data.fonte || 'Non specificata')}
             </div>
             <div class="info-item">
               <strong>Costo</strong>
@@ -91,28 +99,28 @@
           ${data.descrizione ? `
           <div class="detail-section">
             <h3>Descrizione</h3>
-            <p>${data.descrizione}</p>
+            <p>${escapeHtml(data.descrizione)}</p>
           </div>
           ` : ''}
 
           ${data.procedimento ? `
           <div class="detail-section">
             <h3>Procedimento</h3>
-            <p>${data.procedimento}</p>
+            <p>${escapeHtml(data.procedimento)}</p>
           </div>
           ` : ''}
           
           ${data.consiglietti ? `
           <div class="detail-section">
             <h3>Consiglietti</h3>
-            <p>${data.consiglietti}</p>
+            <p>${escapeHtml(data.consiglietti)}</p>
           </div>
           ` : ''}
           
           ${data.variazioni ? `
           <div class="detail-section">
             <h3>Variazioni</h3>
-            <p>${data.variazioni}</p>
+            <p>${escapeHtml(data.variazioni)}</p>
           </div>
           ` : ''}
         </div>

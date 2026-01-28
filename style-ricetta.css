@@ -121,6 +121,10 @@ body {
   color: #3b2f25;
   line-height: 1.6;
   margin: 0;
+  /* IMPORTANTE: Preserva le newlines dal database */
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* =========================
@@ -148,35 +152,35 @@ body {
   body {
     padding: 24px;
   }
-
+  
   .detail-container h1 {
     font-size: 48px;
     margin-bottom: 12px;
   }
-
+  
   .info-grid {
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
     margin-bottom: 24px;
   }
-
+  
   .detail-section {
     padding: 20px;
     margin-bottom: 16px;
   }
-
+  
   .detail-section h3 {
     font-size: 20px;
     margin-bottom: 12px;
   }
-
+  
   /* Layout a due colonne per consiglietti e variazioni */
   .two-column-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
   }
-
+  
   .back-btn {
     font-size: 18px;
     padding: 10px 16px;
@@ -190,11 +194,11 @@ body {
   .detail-container h1 {
     font-size: 28px;
   }
-
+  
   .info-grid {
     grid-template-columns: 1fr 1fr;
   }
-
+  
   .rating-badge {
     font-size: 16px;
     padding: 5px 14px;
