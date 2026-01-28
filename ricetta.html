@@ -39,6 +39,60 @@
     }
     
     /* ==========================
+      CARICA STAGIONI PER LA RICETTA
+    ========================== */
+    async function loadStagioni(ricettaId) {
+      const { data, error } = await supabase
+        .from('ricetta_stagioni')
+        .select('stagioni(nome)')
+        .eq('id_ricetta', ricettaId)
+      
+      if (error) {
+        console.error('Errore caricamento stagioni:', error)
+        return []
+      }
+      
+      return data.map(item => item.stagioni.nome)
+    }
+    
+    /* ==========================
+      CARICA CATEGORIE PER LA RICETTA
+    ========================== */
+    async function loadCategorie(ricettaId) {
+      const { data, error } = await supabase
+        .from('ricetta_categorie')
+        .select('categorie(nome)')
+        .eq('id_ricetta', ricettaId)
+      
+      if (error) {
+        console.error('Errore caricamento categorie:', error)
+        return []
+      }
+      
+      return data.map(item => item.categorie.nome)
+    }
+    
+    /* ==========================
+      CARICA INGREDIENTI CON QUANTITÀ
+    ========================== */
+    async function loadIngredienti(ricettaId) {
+      const { data, error } = await supabase
+        .from('ricetta_ingredienti')
+        .select('quantita, ingredienti(nome)')
+        .eq('id_ricetta', ricettaId)
+      
+      if (error) {
+        console.error('Errore caricamento ingredienti:', error)
+        return []
+      }
+      
+      return data.map(item => ({
+        nome: item.ingredienti.nome,
+        quantita: item.quantita
+      }))
+    }
+    
+    /* ==========================
       CARICAMENTO DETTAGLIO
     ========================== */
     async function loadRicettaDetail(ricettaId) {
@@ -53,6 +107,7 @@
         return
       }
       
+      // Carica ricetta principale
       const { data, error } = await supabase
         .from('ricetta')
         .select('*')
@@ -70,6 +125,13 @@
         `
         return
       }
+      
+      // Carica stagioni, categorie e ingredienti in parallelo
+      const [stagioni, categorie, ingredienti] = await Promise.all([
+        loadStagioni(ricettaId),
+        loadCategorie(ricettaId),
+        loadIngredienti(ricettaId)
+      ])
       
       // Render del dettaglio
       detailContent.innerHTML = `
@@ -94,6 +156,36 @@
               <strong>Sbattimento</strong>
               ${data.sbatti}/5 ${'🔨'.repeat(data.sbatti)}
             </div>
+          </div>
+          
+          <!-- SEZIONE TAGS -->
+          <div class="tags-section">
+            ${stagioni.length > 0 ? `
+            <div class="tag-group">
+              <strong>Stagioni:</strong>
+              <div class="tags-container">
+                ${stagioni.map(s => `<span class="tag tag-stagione">${escapeHtml(s)}</span>`).join('')}
+              </div>
+            </div>
+            ` : ''}
+            
+            ${categorie.length > 0 ? `
+            <div class="tag-group">
+              <strong>Categorie:</strong>
+              <div class="tags-container">
+                ${categorie.map(c => `<span class="tag tag-categoria">${escapeHtml(c)}</span>`).join('')}
+              </div>
+            </div>
+            ` : ''}
+            
+            ${ingredienti.length > 0 ? `
+            <div class="tag-group">
+              <strong>Ingredienti:</strong>
+              <div class="tags-container">
+                ${ingredienti.map(i => `<span class="tag tag-ingrediente">${escapeHtml(i.nome)}${i.quantita ? ', ' + escapeHtml(i.quantita) : ''}</span>`).join('')}
+              </div>
+            </div>
+            ` : ''}
           </div>
           
           ${data.descrizione ? `
