@@ -94,7 +94,7 @@
     ========================== */
     async function loadRicettaIngredienti(ricettaId) {
       const { data, error } = await supabase
-        .from('ricetta-ingredienti')
+        .from('ricetta_ingredienti')
         .select('id, quantita, id_ingredienti, ingredienti(nome)')
         .eq('id_ricetta', ricettaId)
       
@@ -110,7 +110,7 @@
     ========================== */
     async function loadRicettaStagioni(ricettaId) {
       const { data, error } = await supabase
-        .from('ricetta-stagioni')
+        .from('ricetta_stagioni')
         .select('id, id_stagioni, stagioni(nome)')
         .eq('id_ricetta', ricettaId)
       
@@ -126,7 +126,7 @@
     ========================== */
     async function loadRicettaCategorie(ricettaId) {
       const { data, error } = await supabase
-        .from('ricetta-categorie')
+        .from('ricetta_categorie')
         .select('id, id_categorie, categorie(nome)')
         .eq('id_ricetta', ricettaId)
       
@@ -200,7 +200,7 @@
       
       // Inserisci nel database
       const { data, error } = await supabase
-        .from('ricetta-ingredienti')
+        .from('ricetta_ingredienti')
         .insert([{
           id_ricetta: ricettaId,
           id_ingredienti: ingredienteId,
@@ -228,7 +228,7 @@
     ========================== */
     window.removeIngrediente = async function(id) {
       const { error } = await supabase
-        .from('ricetta-ingredienti')
+        .from('ricetta_ingredienti')
         .delete()
         .eq('id', id)
       
@@ -261,7 +261,7 @@
       
       // Inserisci nel database
       const { data, error } = await supabase
-        .from('ricetta-stagioni')
+        .from('ricetta_stagioni')
         .insert([{
           id_ricetta: ricettaId,
           id_stagioni: stagioneId
@@ -287,7 +287,7 @@
     ========================== */
     window.removeStagione = async function(id) {
       const { error } = await supabase
-        .from('ricetta-stagioni')
+        .from('ricetta_stagioni')
         .delete()
         .eq('id', id)
       
@@ -320,7 +320,7 @@
       
       // Inserisci nel database
       const { data, error } = await supabase
-        .from('ricetta-categorie')
+        .from('ricetta_categorie')
         .insert([{
           id_ricetta: ricettaId,
           id_categorie: categoriaId
@@ -346,7 +346,7 @@
     ========================== */
     window.removeCategoria = async function(id) {
       const { error } = await supabase
-        .from('ricetta-categorie')
+        .from('ricetta_categorie')
         .delete()
         .eq('id', id)
       
@@ -358,6 +358,132 @@
       
       currentCategorie = currentCategorie.filter(c => c.id !== id)
       renderCategorie()
+    }
+    
+    /* ==========================
+      CREA NUOVO INGREDIENTE
+    ========================== */
+    window.createNuovoIngrediente = async function() {
+      const inputEl = document.getElementById('nuovoIngrediente')
+      const nome = inputEl.value.trim()
+      
+      if (!nome) {
+        alert('Inserisci il nome dell\'ingrediente')
+        return
+      }
+      
+      // Inserisci nella tabella ingredienti
+      const { data, error } = await supabase
+        .from('ingredienti')
+        .insert([{ nome: nome }])
+        .select()
+      
+      if (error) {
+        console.error('Errore creazione ingrediente:', error)
+        alert('Errore durante la creazione')
+        return
+      }
+      
+      // Aggiungi alla lista globale
+      allIngredienti.push(data[0])
+      allIngredienti.sort((a, b) => a.nome.localeCompare(b.nome))
+      
+      // Aggiorna la select
+      const selectEl = document.getElementById('selectIngrediente')
+      selectEl.innerHTML = '<option value="">-- Seleziona ingrediente --</option>' + 
+        allIngredienti.map(ing => `<option value="${ing.id}">${escapeHtml(ing.nome)}</option>`).join('')
+      
+      // Seleziona il nuovo ingrediente
+      selectEl.value = data[0].id
+      
+      // Reset input
+      inputEl.value = ''
+      
+      alert(`✅ Ingrediente "${nome}" creato con successo!`)
+    }
+    
+    /* ==========================
+      CREA NUOVA STAGIONE
+    ========================== */
+    window.createNuovaStagione = async function() {
+      const inputEl = document.getElementById('nuovaStagione')
+      const nome = inputEl.value.trim()
+      
+      if (!nome) {
+        alert('Inserisci il nome della stagione')
+        return
+      }
+      
+      // Inserisci nella tabella stagioni
+      const { data, error } = await supabase
+        .from('stagioni')
+        .insert([{ nome: nome }])
+        .select()
+      
+      if (error) {
+        console.error('Errore creazione stagione:', error)
+        alert('Errore durante la creazione')
+        return
+      }
+      
+      // Aggiungi alla lista globale
+      allStagioni.push(data[0])
+      allStagioni.sort((a, b) => a.nome.localeCompare(b.nome))
+      
+      // Aggiorna la select
+      const selectEl = document.getElementById('selectStagione')
+      selectEl.innerHTML = '<option value="">-- Seleziona stagione --</option>' + 
+        allStagioni.map(stag => `<option value="${stag.id}">${escapeHtml(stag.nome)}</option>`).join('')
+      
+      // Seleziona la nuova stagione
+      selectEl.value = data[0].id
+      
+      // Reset input
+      inputEl.value = ''
+      
+      alert(`✅ Stagione "${nome}" creata con successo!`)
+    }
+    
+    /* ==========================
+      CREA NUOVA CATEGORIA
+    ========================== */
+    window.createNuovaCategoria = async function() {
+      const inputEl = document.getElementById('nuovaCategoria')
+      const nome = inputEl.value.trim()
+      
+      if (!nome) {
+        alert('Inserisci il nome della categoria')
+        return
+      }
+      
+      // Inserisci nella tabella categorie
+      const { data, error } = await supabase
+        .from('categorie')
+        .insert([{ nome: nome }])
+        .select()
+      
+      if (error) {
+        console.error('Errore creazione categoria:', error)
+        alert('Errore durante la creazione')
+        return
+      }
+      
+      // Aggiungi alla lista globale
+      allCategorie.push(data[0])
+      allCategorie.sort((a, b) => a.nome.localeCompare(b.nome))
+      
+      // Aggiorna la select
+      const selectEl = document.getElementById('selectCategoria')
+      selectEl.innerHTML = '<option value="">-- Seleziona categoria --</option>' + 
+        allCategorie.map(cat => `<option value="${cat.id}">${escapeHtml(cat.nome)}</option>`).join('')
+      
+      // Seleziona la nuova categoria
+      selectEl.value = data[0].id
+      
+      // Reset input
+      inputEl.value = ''
+      
+      alert(`✅ Categoria "${nome}" creata con successo!`)
     }
     
     /* ==========================
@@ -462,6 +588,10 @@
                 <input type="text" id="quantitaIngrediente" placeholder="Quantità" class="quantita-input">
                 <button type="button" class="btn-add-tag" onclick="addIngrediente()">+ Aggiungi</button>
               </div>
+              <div class="add-new-row">
+                <input type="text" id="nuovoIngrediente" placeholder="Nuovo ingrediente..." class="new-item-input">
+                <button type="button" class="btn-create-new" onclick="createNuovoIngrediente()">➕ Crea Nuovo</button>
+              </div>
             </div>
             
             <!-- SEZIONE STAGIONI -->
@@ -475,6 +605,10 @@
                 </select>
                 <button type="button" class="btn-add-tag" onclick="addStagione()">+ Aggiungi</button>
               </div>
+              <div class="add-new-row">
+                <input type="text" id="nuovaStagione" placeholder="Nuova stagione..." class="new-item-input">
+                <button type="button" class="btn-create-new" onclick="createNuovaStagione()">➕ Crea Nuovo</button>
+              </div>
             </div>
             
             <!-- SEZIONE CATEGORIE -->
@@ -487,6 +621,10 @@
                   ${allCategorie.map(cat => `<option value="${cat.id}">${escapeHtml(cat.nome)}</option>`).join('')}
                 </select>
                 <button type="button" class="btn-add-tag" onclick="addCategoria()">+ Aggiungi</button>
+              </div>
+              <div class="add-new-row">
+                <input type="text" id="nuovaCategoria" placeholder="Nuova categoria..." class="new-item-input">
+                <button type="button" class="btn-create-new" onclick="createNuovaCategoria()">➕ Crea Nuovo</button>
               </div>
             </div>
             ` : '<div class="info-box">💡 Salva prima la ricetta per aggiungere ingredienti, stagioni e categorie</div>'}
