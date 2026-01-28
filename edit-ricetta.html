@@ -5,7 +5,6 @@
   <title>Modifica Ricetta</title>
   <link rel="stylesheet" href="style-edit-ricetta.css">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
 </head>
 <body>
   <a href="edit.html" class="back-btn">← Torna alla lista admin</a>
@@ -73,8 +72,8 @@
 
             ${data?.punteggio ? `
             <div class="form-group">
-            <label>Punteggio (calcolato automaticamente)</label>
-            <input type="text" value="⭐ ${Number(data.punteggio).toFixed(1)}" disabled style="background: #f0f0f0;">
+              <label>Punteggio (calcolato automaticamente)</label>
+              <input type="text" value="⭐ ${Number(data.punteggio).toFixed(1)}" disabled style="background: #f0f0f0;">
             </div>
             ` : ''}
 
@@ -84,8 +83,13 @@
             </div>
 
             <div class="form-group">
-              <label for="procedimento">Procedimento</label>
-              <textarea id="procedimento">${data?.procedimento || ''}</textarea>
+              <label for="preparazione">Preparazione</label>
+              <textarea id="preparazione">${data?.preparazione || ''}</textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="esecuzione">Esecuzione</label>
+              <textarea id="esecuzione">${data?.esecuzione || ''}</textarea>
             </div>
             
             <div class="form-group">
@@ -147,6 +151,8 @@
         gusto: parseInt(document.getElementById('gusto').value),
         sbatti: parseInt(document.getElementById('sbatti').value),
         descrizione: document.getElementById('descrizione').value.trim() || null,
+        preparazione: document.getElementById('preparazione').value.trim() || null,
+        esecuzione: document.getElementById('esecuzione').value.trim() || null,
         consiglietti: document.getElementById('consiglietti').value.trim() || null,
         variazioni: document.getElementById('variazioni').value.trim() || null
       }
