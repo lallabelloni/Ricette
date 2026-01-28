@@ -23,6 +23,16 @@
     let isEditMode = false
     let ricettaId = null
     
+    // Liste globali
+    let allIngredienti = []
+    let allStagioni = []
+    let allCategorie = []
+    
+    // Liste correnti della ricetta
+    let currentIngredienti = []
+    let currentStagioni = []
+    let currentCategorie = []
+    
     /* ==========================
       RECUPERA ID DALLA URL
     ========================== */
@@ -32,11 +42,348 @@
     }
     
     /* ==========================
+      CARICA TUTTI GLI INGREDIENTI
+    ========================== */
+    async function loadAllIngredienti() {
+      const { data, error } = await supabase
+        .from('ingredienti')
+        .select('id, nome')
+        .order('nome')
+      
+      if (error) {
+        console.error('Errore caricamento ingredienti:', error)
+        return []
+      }
+      return data || []
+    }
+    
+    /* ==========================
+      CARICA TUTTE LE STAGIONI
+    ========================== */
+    async function loadAllStagioni() {
+      const { data, error } = await supabase
+        .from('stagioni')
+        .select('id, nome')
+        .order('nome')
+      
+      if (error) {
+        console.error('Errore caricamento stagioni:', error)
+        return []
+      }
+      return data || []
+    }
+    
+    /* ==========================
+      CARICA TUTTE LE CATEGORIE
+    ========================== */
+    async function loadAllCategorie() {
+      const { data, error } = await supabase
+        .from('categorie')
+        .select('id, nome')
+        .order('nome')
+      
+      if (error) {
+        console.error('Errore caricamento categorie:', error)
+        return []
+      }
+      return data || []
+    }
+    
+    /* ==========================
+      CARICA INGREDIENTI DELLA RICETTA
+    ========================== */
+    async function loadRicettaIngredienti(ricettaId) {
+      const { data, error } = await supabase
+        .from('ricetta_ingredienti')
+        .select('id, quantita, id_ingredienti, ingredienti(nome)')
+        .eq('id_ricetta', ricettaId)
+      
+      if (error) {
+        console.error('Errore caricamento ingredienti ricetta:', error)
+        return []
+      }
+      return data || []
+    }
+    
+    /* ==========================
+      CARICA STAGIONI DELLA RICETTA
+    ========================== */
+    async function loadRicettaStagioni(ricettaId) {
+      const { data, error } = await supabase
+        .from('ricetta_stagioni')
+        .select('id, id_stagioni, stagioni(nome)')
+        .eq('id_ricetta', ricettaId)
+      
+      if (error) {
+        console.error('Errore caricamento stagioni ricetta:', error)
+        return []
+      }
+      return data || []
+    }
+    
+    /* ==========================
+      CARICA CATEGORIE DELLA RICETTA
+    ========================== */
+    async function loadRicettaCategorie(ricettaId) {
+      const { data, error } = await supabase
+        .from('ricetta_categorie')
+        .select('id, id_categorie, categorie(nome)')
+        .eq('id_ricetta', ricettaId)
+      
+      if (error) {
+        console.error('Errore caricamento categorie ricetta:', error)
+        return []
+      }
+      return data || []
+    }
+    
+    /* ==========================
+      RENDER INGREDIENTI
+    ========================== */
+    function renderIngredienti() {
+      const container = document.getElementById('ingredientiList')
+      
+      container.innerHTML = currentIngredienti.map(ing => `
+        <div class="tag-item" data-id="${ing.id}">
+          <span>${escapeHtml(ing.ingredienti.nome)}${ing.quantita ? ', ' + escapeHtml(ing.quantita) : ''}</span>
+          <button type="button" class="remove-btn" onclick="removeIngrediente(${ing.id})">✕</button>
+        </div>
+      `).join('')
+    }
+    
+    /* ==========================
+      RENDER STAGIONI
+    ========================== */
+    function renderStagioni() {
+      const container = document.getElementById('stagioniList')
+      
+      container.innerHTML = currentStagioni.map(stag => `
+        <div class="tag-item" data-id="${stag.id}">
+          <span>${escapeHtml(stag.stagioni.nome)}</span>
+          <button type="button" class="remove-btn" onclick="removeStagione(${stag.id})">✕</button>
+        </div>
+      `).join('')
+    }
+    
+    /* ==========================
+      RENDER CATEGORIE
+    ========================== */
+    function renderCategorie() {
+      const container = document.getElementById('categorieList')
+      
+      container.innerHTML = currentCategorie.map(cat => `
+        <div class="tag-item" data-id="${cat.id}">
+          <span>${escapeHtml(cat.categorie.nome)}</span>
+          <button type="button" class="remove-btn" onclick="removeCategoria(${cat.id})">✕</button>
+        </div>
+      `).join('')
+    }
+    
+    /* ==========================
+      AGGIUNGI INGREDIENTE
+    ========================== */
+    window.addIngrediente = async function() {
+      const selectEl = document.getElementById('selectIngrediente')
+      const quantitaEl = document.getElementById('quantitaIngrediente')
+      const ingredienteId = parseInt(selectEl.value)
+      const quantita = quantitaEl.value.trim()
+      
+      if (!ingredienteId) {
+        alert('Seleziona un ingrediente')
+        return
+      }
+      
+      if (!ricettaId) {
+        alert('Salva prima la ricetta')
+        return
+      }
+      
+      // Inserisci nel database
+      const { data, error } = await supabase
+        .from('ricetta_ingredienti')
+        .insert([{
+          id_ricetta: ricettaId,
+          id_ingredienti: ingredienteId,
+          quantita: quantita || null
+        }])
+        .select('id, quantita, id_ingredienti, ingredienti(nome)')
+      
+      if (error) {
+        console.error('Errore aggiunta ingrediente:', error)
+        alert('Errore durante l\'aggiunta')
+        return
+      }
+      
+      // Aggiungi alla lista corrente
+      currentIngredienti.push(data[0])
+      renderIngredienti()
+      
+      // Reset form
+      selectEl.value = ''
+      quantitaEl.value = ''
+    }
+    
+    /* ==========================
+      RIMUOVI INGREDIENTE
+    ========================== */
+    window.removeIngrediente = async function(id) {
+      const { error } = await supabase
+        .from('ricetta_ingredienti')
+        .delete()
+        .eq('id', id)
+      
+      if (error) {
+        console.error('Errore rimozione ingrediente:', error)
+        alert('Errore durante la rimozione')
+        return
+      }
+      
+      currentIngredienti = currentIngredienti.filter(i => i.id !== id)
+      renderIngredienti()
+    }
+    
+    /* ==========================
+      AGGIUNGI STAGIONE
+    ========================== */
+    window.addStagione = async function() {
+      const selectEl = document.getElementById('selectStagione')
+      const stagioneId = parseInt(selectEl.value)
+      
+      if (!stagioneId) {
+        alert('Seleziona una stagione')
+        return
+      }
+      
+      if (!ricettaId) {
+        alert('Salva prima la ricetta')
+        return
+      }
+      
+      // Inserisci nel database
+      const { data, error } = await supabase
+        .from('ricetta_stagioni')
+        .insert([{
+          id_ricetta: ricettaId,
+          id_stagioni: stagioneId
+        }])
+        .select('id, id_stagioni, stagioni(nome)')
+      
+      if (error) {
+        console.error('Errore aggiunta stagione:', error)
+        alert('Errore durante l\'aggiunta')
+        return
+      }
+      
+      // Aggiungi alla lista corrente
+      currentStagioni.push(data[0])
+      renderStagioni()
+      
+      // Reset form
+      selectEl.value = ''
+    }
+    
+    /* ==========================
+      RIMUOVI STAGIONE
+    ========================== */
+    window.removeStagione = async function(id) {
+      const { error } = await supabase
+        .from('ricetta_stagioni')
+        .delete()
+        .eq('id', id)
+      
+      if (error) {
+        console.error('Errore rimozione stagione:', error)
+        alert('Errore durante la rimozione')
+        return
+      }
+      
+      currentStagioni = currentStagioni.filter(s => s.id !== id)
+      renderStagioni()
+    }
+    
+    /* ==========================
+      AGGIUNGI CATEGORIA
+    ========================== */
+    window.addCategoria = async function() {
+      const selectEl = document.getElementById('selectCategoria')
+      const categoriaId = parseInt(selectEl.value)
+      
+      if (!categoriaId) {
+        alert('Seleziona una categoria')
+        return
+      }
+      
+      if (!ricettaId) {
+        alert('Salva prima la ricetta')
+        return
+      }
+      
+      // Inserisci nel database
+      const { data, error } = await supabase
+        .from('ricetta_categorie')
+        .insert([{
+          id_ricetta: ricettaId,
+          id_categorie: categoriaId
+        }])
+        .select('id, id_categorie, categorie(nome)')
+      
+      if (error) {
+        console.error('Errore aggiunta categoria:', error)
+        alert('Errore durante l\'aggiunta')
+        return
+      }
+      
+      // Aggiungi alla lista corrente
+      currentCategorie.push(data[0])
+      renderCategorie()
+      
+      // Reset form
+      selectEl.value = ''
+    }
+    
+    /* ==========================
+      RIMUOVI CATEGORIA
+    ========================== */
+    window.removeCategoria = async function(id) {
+      const { error } = await supabase
+        .from('ricetta_categorie')
+        .delete()
+        .eq('id', id)
+      
+      if (error) {
+        console.error('Errore rimozione categoria:', error)
+        alert('Errore durante la rimozione')
+        return
+      }
+      
+      currentCategorie = currentCategorie.filter(c => c.id !== id)
+      renderCategorie()
+    }
+    
+    /* ==========================
+      ESCAPE HTML
+    ========================== */
+    function escapeHtml(text) {
+      const div = document.createElement('div')
+      div.textContent = text
+      return div.innerHTML
+    }
+    
+    /* ==========================
       RENDER FORM
     ========================== */
-    function renderForm(data = null) {
+    async function renderForm(data = null) {
       isEditMode = !!data
       ricettaId = data?.id || null
+      
+      // Se in edit mode, carica ingredienti/stagioni/categorie
+      if (isEditMode) {
+        [currentIngredienti, currentStagioni, currentCategorie] = await Promise.all([
+          loadRicettaIngredienti(ricettaId),
+          loadRicettaStagioni(ricettaId),
+          loadRicettaCategorie(ricettaId)
+        ])
+      }
       
       container.innerHTML = `
         <div class="container">
@@ -102,6 +449,48 @@
               <textarea id="variazioni">${data?.variazioni || ''}</textarea>
             </div>
             
+            ${isEditMode ? `
+            <!-- SEZIONE INGREDIENTI -->
+            <div class="tags-section">
+              <label class="section-label">Ingredienti:</label>
+              <div id="ingredientiList" class="tags-list"></div>
+              <div class="add-tag-row">
+                <select id="selectIngrediente" class="tag-select">
+                  <option value="">-- Seleziona ingrediente --</option>
+                  ${allIngredienti.map(ing => `<option value="${ing.id}">${escapeHtml(ing.nome)}</option>`).join('')}
+                </select>
+                <input type="text" id="quantitaIngrediente" placeholder="Quantità" class="quantita-input">
+                <button type="button" class="btn-add-tag" onclick="addIngrediente()">+ Aggiungi</button>
+              </div>
+            </div>
+            
+            <!-- SEZIONE STAGIONI -->
+            <div class="tags-section">
+              <label class="section-label">Stagioni:</label>
+              <div id="stagioniList" class="tags-list"></div>
+              <div class="add-tag-row">
+                <select id="selectStagione" class="tag-select">
+                  <option value="">-- Seleziona stagione --</option>
+                  ${allStagioni.map(stag => `<option value="${stag.id}">${escapeHtml(stag.nome)}</option>`).join('')}
+                </select>
+                <button type="button" class="btn-add-tag" onclick="addStagione()">+ Aggiungi</button>
+              </div>
+            </div>
+            
+            <!-- SEZIONE CATEGORIE -->
+            <div class="tags-section">
+              <label class="section-label">Categorie:</label>
+              <div id="categorieList" class="tags-list"></div>
+              <div class="add-tag-row">
+                <select id="selectCategoria" class="tag-select">
+                  <option value="">-- Seleziona categoria --</option>
+                  ${allCategorie.map(cat => `<option value="${cat.id}">${escapeHtml(cat.nome)}</option>`).join('')}
+                </select>
+                <button type="button" class="btn-add-tag" onclick="addCategoria()">+ Aggiungi</button>
+              </div>
+            </div>
+            ` : '<div class="info-box">💡 Salva prima la ricetta per aggiungere ingredienti, stagioni e categorie</div>'}
+            
             <button type="submit" class="btn btn-primary">
               ${isEditMode ? '💾 Salva Modifiche' : '➕ Crea Ricetta'}
             </button>
@@ -109,6 +498,13 @@
           </form>
         </div>
       `
+      
+      // Render liste se in edit mode
+      if (isEditMode) {
+        renderIngredienti()
+        renderStagioni()
+        renderCategorie()
+      }
       
       // Event listener per il form
       document.getElementById('ricettaForm').addEventListener('submit', handleSubmit)
@@ -135,7 +531,7 @@
         return
       }
       
-      renderForm(data)
+      await renderForm(data)
     }
     
     /* ==========================
@@ -179,9 +575,10 @@
         
       } else {
         // INSERT
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('ricetta')
           .insert([formData])
+          .select()
         
         if (error) {
           console.error('Errore inserimento:', error)
@@ -189,22 +586,33 @@
           return
         }
         
-        messageDiv.innerHTML = '<div class="success">✅ Ricetta creata con successo!</div>'
+        messageDiv.innerHTML = '<div class="success">✅ Ricetta creata! Puoi ora aggiungere ingredienti, stagioni e categorie modificandola.</div>'
         setTimeout(() => {
-          window.location.href = 'edit.html'
-        }, 1500)
+          window.location.href = `edit-ricetta.html?id=${data[0].id}`
+        }, 2000)
       }
     }
     
     /* ==========================
       INIT
     ========================== */
-    const id = getRicettaIdFromUrl()
-    if (id) {
-      loadRicetta(id)
-    } else {
-      renderForm()
+    async function init() {
+      // Carica tutte le liste
+      [allIngredienti, allStagioni, allCategorie] = await Promise.all([
+        loadAllIngredienti(),
+        loadAllStagioni(),
+        loadAllCategorie()
+      ])
+      
+      const id = getRicettaIdFromUrl()
+      if (id) {
+        await loadRicetta(id)
+      } else {
+        await renderForm()
+      }
     }
+    
+    init()
   </script>
 </body>
 </html>
