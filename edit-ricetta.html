@@ -94,15 +94,23 @@
     ========================== */
     async function loadRicettaIngredienti(ricettaId) {
       const { data, error } = await supabase
-        .from('ricetta-ingredienti')
-        .select('id, quantita, id_ingredienti, ingredienti(nome)')
+        .from('ricetta_ingredienti')
+        .select('id, quantita, id_ingredienti')
         .eq('id_ricetta', ricettaId)
       
       if (error) {
         console.error('Errore caricamento ingredienti ricetta:', error)
         return []
       }
-      return data || []
+      
+      // Aggiungi i nomi dagli ingredienti globali
+      return (data || []).map(item => {
+        const ingrediente = allIngredienti.find(i => i.id === item.id_ingredienti)
+        return {
+          ...item,
+          ingredienti: { nome: ingrediente?.nome || 'Sconosciuto' }
+        }
+      })
     }
     
     /* ==========================
@@ -110,15 +118,23 @@
     ========================== */
     async function loadRicettaStagioni(ricettaId) {
       const { data, error } = await supabase
-        .from('ricetta-stagioni')
-        .select('id, id_stagioni, stagioni(nome)')
+        .from('ricetta_stagioni')
+        .select('id, id_stagioni')
         .eq('id_ricetta', ricettaId)
       
       if (error) {
         console.error('Errore caricamento stagioni ricetta:', error)
         return []
       }
-      return data || []
+      
+      // Aggiungi i nomi dalle stagioni globali
+      return (data || []).map(item => {
+        const stagione = allStagioni.find(s => s.id === item.id_stagioni)
+        return {
+          ...item,
+          stagioni: { nome: stagione?.nome || 'Sconosciuta' }
+        }
+      })
     }
     
     /* ==========================
@@ -126,15 +142,23 @@
     ========================== */
     async function loadRicettaCategorie(ricettaId) {
       const { data, error } = await supabase
-        .from('ricetta-categorie')
-        .select('id, id_categorie, categorie(nome)')
+        .from('ricetta_categorie')
+        .select('id, id_categorie')
         .eq('id_ricetta', ricettaId)
       
       if (error) {
         console.error('Errore caricamento categorie ricetta:', error)
         return []
       }
-      return data || []
+      
+      // Aggiungi i nomi dalle categorie globali
+      return (data || []).map(item => {
+        const categoria = allCategorie.find(c => c.id === item.id_categorie)
+        return {
+          ...item,
+          categorie: { nome: categoria?.nome || 'Sconosciuta' }
+        }
+      })
     }
     
     /* ==========================
@@ -200,13 +224,13 @@
       
       // Inserisci nel database
       const { data, error } = await supabase
-        .from('ricetta-ingredienti')
+        .from('ricetta_ingredienti')
         .insert([{
           id_ricetta: ricettaId,
           id_ingredienti: ingredienteId,
           quantita: quantita || null
         }])
-        .select('id, quantita, id_ingredienti, ingredienti(nome)')
+        .select()
       
       if (error) {
         console.error('Errore aggiunta ingrediente:', error)
@@ -214,8 +238,16 @@
         return
       }
       
-      // Aggiungi alla lista corrente
-      currentIngredienti.push(data[0])
+      // Trova il nome dell'ingrediente dalla lista globale
+      const ingrediente = allIngredienti.find(i => i.id === ingredienteId)
+      
+      // Aggiungi alla lista corrente con il nome
+      currentIngredienti.push({
+        id: data[0].id,
+        quantita: data[0].quantita,
+        id_ingredienti: ingredienteId,
+        ingredienti: { nome: ingrediente.nome }
+      })
       renderIngredienti()
       
       // Reset form
@@ -228,7 +260,7 @@
     ========================== */
     window.removeIngrediente = async function(id) {
       const { error } = await supabase
-        .from('ricetta-ingredienti')
+        .from('ricetta_ingredienti')
         .delete()
         .eq('id', id)
       
@@ -261,12 +293,12 @@
       
       // Inserisci nel database
       const { data, error } = await supabase
-        .from('ricetta-stagioni')
+        .from('ricetta_stagioni')
         .insert([{
           id_ricetta: ricettaId,
           id_stagioni: stagioneId
         }])
-        .select('id, id_stagioni, stagioni(nome)')
+        .select()
       
       if (error) {
         console.error('Errore aggiunta stagione:', error)
@@ -274,8 +306,15 @@
         return
       }
       
-      // Aggiungi alla lista corrente
-      currentStagioni.push(data[0])
+      // Trova il nome della stagione dalla lista globale
+      const stagione = allStagioni.find(s => s.id === stagioneId)
+      
+      // Aggiungi alla lista corrente con il nome
+      currentStagioni.push({
+        id: data[0].id,
+        id_stagioni: stagioneId,
+        stagioni: { nome: stagione.nome }
+      })
       renderStagioni()
       
       // Reset form
@@ -287,7 +326,7 @@
     ========================== */
     window.removeStagione = async function(id) {
       const { error } = await supabase
-        .from('ricetta-stagioni')
+        .from('ricetta_stagioni')
         .delete()
         .eq('id', id)
       
@@ -320,12 +359,12 @@
       
       // Inserisci nel database
       const { data, error } = await supabase
-        .from('ricetta-categorie')
+        .from('ricetta_categorie')
         .insert([{
           id_ricetta: ricettaId,
           id_categorie: categoriaId
         }])
-        .select('id, id_categorie, categorie(nome)')
+        .select()
       
       if (error) {
         console.error('Errore aggiunta categoria:', error)
@@ -333,8 +372,15 @@
         return
       }
       
-      // Aggiungi alla lista corrente
-      currentCategorie.push(data[0])
+      // Trova il nome della categoria dalla lista globale
+      const categoria = allCategorie.find(c => c.id === categoriaId)
+      
+      // Aggiungi alla lista corrente con il nome
+      currentCategorie.push({
+        id: data[0].id,
+        id_categorie: categoriaId,
+        categorie: { nome: categoria.nome }
+      })
       renderCategorie()
       
       // Reset form
@@ -346,7 +392,7 @@
     ========================== */
     window.removeCategoria = async function(id) {
       const { error } = await supabase
-        .from('ricetta-categorie')
+        .from('ricetta_categorie')
         .delete()
         .eq('id', id)
       
