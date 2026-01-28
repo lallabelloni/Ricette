@@ -94,7 +94,7 @@
     ========================== */
     async function loadRicettaIngredienti(ricettaId) {
       const { data, error } = await supabase
-        .from('ricetta_ingredienti')
+        .from('ricetta-ingredienti')
         .select('id, quantita, id_ingredienti')
         .eq('id_ricetta', ricettaId)
       
@@ -118,7 +118,7 @@
     ========================== */
     async function loadRicettaStagioni(ricettaId) {
       const { data, error } = await supabase
-        .from('ricetta_stagioni')
+        .from('ricetta-stagioni')
         .select('id, id_stagioni')
         .eq('id_ricetta', ricettaId)
       
@@ -142,7 +142,7 @@
     ========================== */
     async function loadRicettaCategorie(ricettaId) {
       const { data, error } = await supabase
-        .from('ricetta_categorie')
+        .from('ricetta-categorie')
         .select('id, id_categorie')
         .eq('id_ricetta', ricettaId)
       
@@ -212,6 +212,11 @@
       const ingredienteId = parseInt(selectEl.value)
       const quantita = quantitaEl.value.trim()
       
+      console.log('Valore select:', selectEl.value)
+      console.log('Ingrediente ID dopo parseInt:', ingredienteId)
+      console.log('Quantità:', quantita)
+      console.log('Ricetta ID:', ricettaId)
+      
       if (!ingredienteId) {
         alert('Seleziona un ingrediente')
         return
@@ -224,7 +229,7 @@
       
       // Inserisci nel database
       const { data, error } = await supabase
-        .from('ricetta_ingredienti')
+        .from('ricetta-ingredienti')
         .insert([{
           id_ricetta: ricettaId,
           id_ingredienti: ingredienteId,
@@ -234,7 +239,7 @@
       
       if (error) {
         console.error('Errore aggiunta ingrediente:', error)
-        alert('Errore durante l\'aggiunta')
+        alert('Errore durante l\'aggiunta: ' + error.message)
         return
       }
       
@@ -260,7 +265,7 @@
     ========================== */
     window.removeIngrediente = async function(id) {
       const { error } = await supabase
-        .from('ricetta_ingredienti')
+        .from('ricetta-ingredienti')
         .delete()
         .eq('id', id)
       
@@ -281,6 +286,10 @@
       const selectEl = document.getElementById('selectStagione')
       const stagioneId = parseInt(selectEl.value)
       
+      console.log('Valore select:', selectEl.value)
+      console.log('Stagione ID dopo parseInt:', stagioneId)
+      console.log('Ricetta ID:', ricettaId)
+      
       if (!stagioneId) {
         alert('Seleziona una stagione')
         return
@@ -293,7 +302,7 @@
       
       // Inserisci nel database
       const { data, error } = await supabase
-        .from('ricetta_stagioni')
+        .from('ricetta-stagioni')
         .insert([{
           id_ricetta: ricettaId,
           id_stagioni: stagioneId
@@ -302,7 +311,7 @@
       
       if (error) {
         console.error('Errore aggiunta stagione:', error)
-        alert('Errore durante l\'aggiunta')
+        alert('Errore durante l\'aggiunta: ' + error.message)
         return
       }
       
@@ -326,7 +335,7 @@
     ========================== */
     window.removeStagione = async function(id) {
       const { error } = await supabase
-        .from('ricetta_stagioni')
+        .from('ricetta-stagioni')
         .delete()
         .eq('id', id)
       
@@ -347,6 +356,10 @@
       const selectEl = document.getElementById('selectCategoria')
       const categoriaId = parseInt(selectEl.value)
       
+      console.log('Valore select:', selectEl.value)
+      console.log('Categoria ID dopo parseInt:', categoriaId)
+      console.log('Ricetta ID:', ricettaId)
+      
       if (!categoriaId) {
         alert('Seleziona una categoria')
         return
@@ -359,7 +372,7 @@
       
       // Inserisci nel database
       const { data, error } = await supabase
-        .from('ricetta_categorie')
+        .from('ricetta-categorie')
         .insert([{
           id_ricetta: ricettaId,
           id_categorie: categoriaId
@@ -368,7 +381,7 @@
       
       if (error) {
         console.error('Errore aggiunta categoria:', error)
-        alert('Errore durante l\'aggiunta')
+        alert('Errore durante l\'aggiunta: ' + error.message)
         return
       }
       
@@ -392,7 +405,7 @@
     ========================== */
     window.removeCategoria = async function(id) {
       const { error } = await supabase
-        .from('ricetta_categorie')
+        .from('ricetta-categorie')
         .delete()
         .eq('id', id)
       
