@@ -43,7 +43,7 @@
     ========================== */
     async function loadStagioni(ricettaId) {
       const { data, error } = await supabase
-        .from('ricetta_stagioni')
+        .from('ricetta-stagioni')
         .select('stagioni(nome)')
         .eq('id_ricetta', ricettaId)
       
@@ -60,7 +60,7 @@
     ========================== */
     async function loadCategorie(ricettaId) {
       const { data, error } = await supabase
-        .from('ricetta_categorie')
+        .from('ricetta-categorie')
         .select('categorie(nome)')
         .eq('id_ricetta', ricettaId)
       
@@ -77,7 +77,7 @@
     ========================== */
     async function loadIngredienti(ricettaId) {
       const { data, error } = await supabase
-        .from('ricetta_ingredienti')
+        .from('ricetta-ingredienti')
         .select('quantita, ingredienti(nome)')
         .eq('id_ricetta', ricettaId)
       
