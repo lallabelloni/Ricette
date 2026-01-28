@@ -103,10 +103,17 @@
           </div>
           ` : ''}
 
-          ${data.procedimento ? `
+          ${data.preparazione ? `
           <div class="detail-section">
-            <h3>Procedimento</h3>
-            <p>${escapeHtml(data.procedimento)}</p>
+            <h3>preparazione</h3>
+            <p>${escapeHtml(data.preparazione)}</p>
+          </div>
+          ` : ''}
+
+          ${data.esecuzione ? `
+          <div class="detail-section">
+            <h3>esecuzione</h3>
+            <p>${escapeHtml(data.esecuzione)}</p>
           </div>
           ` : ''}
           
