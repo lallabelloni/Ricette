@@ -86,12 +86,12 @@
         const div = document.createElement('div')
         div.className = 'ricetta-item'
         div.innerHTML = `
-          <span>${r.nome}/5</span>
-          <span>${r.fonte ?? '-'}/5</span>
-          <span>${r.costo}/5</span>
-          <span>${r.gusto}/5</span>
-          <span>${r.sbatti}/5</span>
-          <span>⭐ ${Number(r.punteggio)}/10</span>
+          <span>${r.nome}</span>
+          <span>${r.fonte ?? '-'}</span>
+          <span>${r.costo}</span>
+          <span>${r.gusto}</span>
+          <span>${r.sbatti}</span>
+          <span>⭐ ${Number(r.punteggio)}</span>
         `
 
         // Quando clicchi, vai alla pagina dettaglio passando l'ID
