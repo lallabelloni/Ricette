@@ -77,35 +77,21 @@
           <span>Costo</span>
           <span>Gusto</span>
           <span>Sbatti</span>
-          <span>Punteggio</span>
+          <span>Punti fuorisede</span>
         </div>
       `
       
 
-      /*
-      resultsDiv.innerHTML += `
-        <div class="row header">
-          Nome | Fonte | Costo | Gusto | Sbatti | Punteggio
-        </div>
-      */
-
-      /*data.forEach(r => {
-        resultsDiv.innerHTML += `
-          <div style="padding:5px; border-bottom:1px solid #eee">
-            ${r.nome} | ${r.fonte ?? '-'} | costo: ${r.costo} | gusto: ${r.gusto} | sbatti: ${r.sbatti} | ⭐: ${Number(r.punteggio)}
-          </div>
-        `
-      })*/
       data.forEach(r => {
         const div = document.createElement('div')
         div.className = 'ricetta-item'
         div.innerHTML = `
-          <span>${r.nome}</span>
-          <span>${r.fonte ?? '-'}</span>
-          <span>${r.costo}</span>
-          <span>${r.gusto}</span>
-          <span>${r.sbatti}</span>
-          <span>⭐ ${Number(r.punteggio)}</span>
+          <span>${r.nome}/5</span>
+          <span>${r.fonte ?? '-'}/5</span>
+          <span>${r.costo}/5</span>
+          <span>${r.gusto}/5</span>
+          <span>${r.sbatti}/5</span>
+          <span>⭐ ${Number(r.punteggio)}/10</span>
         `
 
         // Quando clicchi, vai alla pagina dettaglio passando l'ID
